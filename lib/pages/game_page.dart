@@ -165,7 +165,26 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _exitGame() {
-    Navigator.of(context).pop();
+    print('Exit button pressed - attempting to show ad...');
+    // Show interstitial ad with 50% probability before exiting
+    InterstitialAdService.instance.showAdWithProbability(
+      onAdDismissed: () {
+        // This callback runs after the ad is dismissed - exit immediately
+        print('Ad dismissed - exiting immediately');
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+    ).then((adShown) {
+      if (!adShown) {
+        // If ad wasn't shown (50% chance), exit immediately
+        print('Ad not shown - exiting immediately');
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+      // If ad was shown, exit will happen in the onAdDismissed callback
+    });
   }
 
   void _moveTile(int row, int col) {
@@ -338,7 +357,7 @@ class _GamePageState extends State<GamePage> {
   Widget _buildExitButton() {
     return GameButton(
       icon: Icons.arrow_back,
-      onPressed: _exitGame,
+      onPressed: _exitGame, // Shows ad 50% of the time before exiting
       gradient: const LinearGradient(
         colors: [AppColors.error, AppColors.errorDark],
       ),

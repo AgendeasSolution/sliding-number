@@ -51,11 +51,12 @@ class InterstitialAdService {
                 print('Interstitial ad showed full screen content');
               },
               onAdDismissedFullScreenContent: (ad) {
-                print('Interstitial ad dismissed');
+                print('Interstitial ad dismissed - calling callback immediately');
                 // Call the callback immediately when ad is dismissed
                 _onAdDismissedCallback?.call();
                 _onAdDismissedCallback = null; // Clear callback
                 _disposeAd();
+                print('Callback called and ad disposed');
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
                 print('Interstitial ad failed to show: $error');
