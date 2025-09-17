@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'pages/splash_page.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Google Mobile Ads SDK with error handling
+  try {
+    await MobileAds.instance.initialize();
+    print('Google Mobile Ads initialized successfully');
+  } catch (e) {
+    print('Failed to initialize Google Mobile Ads: $e');
+    // Continue running the app even if ads fail to initialize
+  }
   
   // Set preferred orientations to portrait only
   SystemChrome.setPreferredOrientations([

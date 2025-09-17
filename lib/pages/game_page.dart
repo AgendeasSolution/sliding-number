@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/game_state.dart';
 import '../services/game_service.dart';
+import '../services/interstitial_ad_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/game_utils.dart';
 import '../widgets/game_board.dart';
@@ -33,6 +34,8 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     _initializeGame();
+    // Preload interstitial ad for better user experience
+    InterstitialAdService.instance.preloadAd();
   }
 
   Future<void> _initializeGame() async {
@@ -88,6 +91,24 @@ class _GamePageState extends State<GamePage> {
 
   void _resetToInitialState() {
     if (_gameState != null) {
+      // Show interstitial ad with 50% probability
+      InterstitialAdService.instance.showAdWithProbability(
+        onAdDismissed: () {
+          // This callback runs after the ad is dismissed
+          _performReset();
+        },
+      ).then((adShown) {
+        if (!adShown) {
+          // If ad wasn't shown (50% chance), perform reset immediately
+          _performReset();
+        }
+        // If ad was shown, reset will happen in the onAdDismissed callback
+      });
+    }
+  }
+
+  void _performReset() {
+    if (_gameState != null) {
       setState(() {
         _gameState = GameService.resetToInitial(_gameState!);
         _startGame();
@@ -102,6 +123,34 @@ class _GamePageState extends State<GamePage> {
         _gameState = newGameState;
         _initGame();
       });
+    }
+  }
+
+  Future<void> _nextLevelWithAd() async {
+    // Show interstitial ad with 100% probability before next level
+    final adShown = await InterstitialAdService.instance.showAdAlways(
+      onAdDismissed: () {
+        // This callback runs after the ad is dismissed
+        _proceedToNextLevel();
+      },
+    );
+
+    if (!adShown) {
+      // If ad wasn't shown (due to loading error), proceed immediately
+      _proceedToNextLevel();
+    }
+    // If ad was shown, next level will happen in the onAdDismissed callback
+  }
+
+  Future<void> _proceedToNextLevel() async {
+    if (_gameState != null && _gameState!.currentLevel < _gameState!.maxLevel) {
+      final newGameState = await GameService.nextLevel(_gameState!);
+      if (mounted) {
+        setState(() {
+          _gameState = newGameState;
+          _initGame();
+        });
+      }
     }
   }
 
@@ -143,13 +192,63 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _shuffleGame() {
+  void _shuffleGame() async {
+    if (_gameState != null) {
+      print('Shuffle button pressed - attempting to show ad...');
+      
+      // First, ensure we have an ad loaded
+      await InterstitialAdService.instance.preloadAd();
+      
+      // Show interstitial ad as reward for shuffle
+      final adShown = await InterstitialAdService.instance.showAdAlways(
+        onAdDismissed: () {
+          // This callback runs after the ad is dismissed - user gets the reward
+          print('Ad dismissed - giving shuffle reward');
+          _performShuffle();
+        },
+      );
+
+      print('Ad show result: $adShown');
+      
+      if (!adShown) {
+        // If ad wasn't shown (due to loading error), still give the reward
+        print('Ad not shown - giving shuffle reward anyway');
+        _performShuffle();
+      }
+      // If ad was shown, shuffle will happen in the onAdDismissed callback
+    }
+  }
+
+  void _performShuffle() {
     if (_gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
         _startGame();
       });
+      // Show feedback that user earned the shuffle reward
+      _showShuffleRewardFeedback();
     }
+  }
+
+  void _showShuffleRewardFeedback() {
+    // Show a brief snackbar to confirm the reward was earned
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.shuffle, color: Colors.white),
+            SizedBox(width: 8),
+            Text('🎉 Shuffle reward earned! Board shuffled!'),
+          ],
+        ),
+        backgroundColor: AppColors.success,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
@@ -260,7 +359,7 @@ class _GamePageState extends State<GamePage> {
   Widget _buildResetButton() {
     return GameButton(
       icon: Icons.refresh,
-      onPressed: _resetToInitialState,
+      onPressed: _resetToInitialState, // Shows interstitial ad 50% of the time
       gradient: const LinearGradient(
         colors: [AppColors.warning, AppColors.warningDark],
       ),
@@ -351,7 +450,7 @@ class _GamePageState extends State<GamePage> {
   Widget _buildShuffleButton() {
     return GameButton(
       icon: Icons.shuffle,
-      onPressed: _shuffleGame,
+      onPressed: _shuffleGame, // Watch ad to earn shuffle reward
       gradient: const LinearGradient(
         colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
       ),
@@ -425,13 +524,13 @@ class _GamePageState extends State<GamePage> {
             child: _buildGameButton(
               context,
               label: isGameComplete ? 'PLAY AGAIN' : 'NEXT LEVEL',
-              icon: isGameComplete ? '🔄' : '🚀',
+              icon: isGameComplete ? '🔄' : '🚀', // Next level shows ad 100% of the time
               onPressed: () {
                 Navigator.of(context).pop();
                 if (isGameComplete) {
                   _playAgain();
                 } else {
-                  _nextLevel();
+                  _nextLevelWithAd();
                 }
               },
               isPrimary: true,
