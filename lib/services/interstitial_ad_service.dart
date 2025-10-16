@@ -136,8 +136,8 @@ class InterstitialAdService {
       
       // Wait a bit for the ad to load
       int attempts = 0;
-      while (!_isAdReady && attempts < 10) {
-        await Future.delayed(const Duration(milliseconds: 500));
+      while (!_isAdReady && attempts < 3) {
+        await Future.delayed(const Duration(milliseconds: 300));
         attempts++;
         print('Waiting for ad to load... attempt $attempts');
       }
