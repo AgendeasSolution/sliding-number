@@ -7,4 +7,5 @@ export 'instruction_item.dart';
 export 'modal_container.dart';
 export 'modal_footer.dart';
 export 'modal_header.dart';
+export 'sound_toggle_button.dart';
 export 'stat_item.dart';

@@ -11,6 +11,7 @@ import '../widgets/modal_header.dart';
 import '../widgets/modal_footer.dart';
 import '../widgets/instruction_item.dart';
 import '../widgets/ad_banner.dart';
+import '../widgets/sound_toggle_button.dart';
 import '../services/level_progression_service.dart';
 import '../services/audio_service.dart';
 import 'game_page.dart';
@@ -134,6 +135,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     // Animated background particles
                     _buildAnimatedBackground(),
+                    // Sound toggle button in top-right corner
+                    Positioned(
+                      top: _getResponsiveValue(context,
+                        smallMobile: 8.0,
+                        mobile: 12.0,
+                        largeMobile: 16.0,
+                        tablet: 20.0,
+                        desktop: 24.0,
+                      ),
+                      right: _getResponsiveValue(context,
+                        smallMobile: 12.0,
+                        mobile: 16.0,
+                        largeMobile: 20.0,
+                        tablet: 24.0,
+                        desktop: 32.0,
+                      ),
+                      child: SoundToggleButton(
+                        size: _getResponsiveValue(context,
+                          smallMobile: 28.0,
+                          mobile: 30.0,
+                          largeMobile: 32.0,
+                          tablet: 34.0,
+                          desktop: 36.0,
+                        ),
+                      ),
+                    ),
                     // Main content
                     Padding(
                       padding: EdgeInsets.symmetric(

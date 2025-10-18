@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AudioService {
   static final AudioService _instance = AudioService._internal();
@@ -8,6 +9,7 @@ class AudioService {
   static AudioService get instance => _instance;
 
   bool _isSoundEnabled = true;
+  static const String _soundEnabledKey = 'sound_enabled';
   
   // Single audio player for all sounds to prevent collision
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -68,21 +70,45 @@ class AudioService {
   }
 
   /// Toggle sound on/off
-  void toggleSound() {
+  Future<void> toggleSound() async {
     _isSoundEnabled = !_isSoundEnabled;
+    await _saveSoundState();
   }
 
   /// Check if sound is enabled
   bool get isSoundEnabled => _isSoundEnabled;
 
   /// Set sound enabled state
-  void setSoundEnabled(bool enabled) {
+  Future<void> setSoundEnabled(bool enabled) async {
     _isSoundEnabled = enabled;
+    await _saveSoundState();
+  }
+
+  /// Save sound state to SharedPreferences
+  Future<void> _saveSoundState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_soundEnabledKey, _isSoundEnabled);
+    } catch (e) {
+      // Silent error handling
+    }
+  }
+
+  /// Load sound state from SharedPreferences
+  Future<void> _loadSoundState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isSoundEnabled = prefs.getBool(_soundEnabledKey) ?? true;
+    } catch (e) {
+      // Silent error handling, default to enabled
+      _isSoundEnabled = true;
+    }
   }
 
   /// Initialize the audio service
   Future<void> initialize() async {
     try {
+      await _loadSoundState();
       await _audioPlayer.setVolume(1.0);
       await _audioPlayer.setReleaseMode(ReleaseMode.release);
       await _audioPlayer.setPlayerMode(PlayerMode.lowLatency);
