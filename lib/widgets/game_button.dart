@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_constants.dart';
+import '../services/audio_service.dart';
 
 class GameButton extends StatelessWidget {
   final String? label;
@@ -41,7 +42,10 @@ class GameButton extends StatelessWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: () {
+          AudioService.instance.playClickSound();
+          onPressed();
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,

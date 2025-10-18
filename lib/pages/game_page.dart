@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../models/game_state.dart';
 import '../services/game_service.dart';
 import '../services/interstitial_ad_service.dart';
+import '../services/audio_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/game_utils.dart';
 import '../widgets/game_board.dart';
@@ -33,6 +34,8 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     _initializeGame();
+    // Initialize audio service
+    AudioService.instance.initialize();
     // Preload interstitial ad for better user experience
     InterstitialAdService.instance.preloadAd();
   }
@@ -189,6 +192,9 @@ class _GamePageState extends State<GamePage> {
         _gameState = GameService.moveTile(_gameState!, row, col);
         if (_gameState!.isWin) {
           _handleWin();
+        } else {
+          // Play slide sound for successful tile movement
+          AudioService.instance.playSlideSound();
         }
       });
     }
@@ -196,6 +202,8 @@ class _GamePageState extends State<GamePage> {
 
   void _handleWin() {
     _stopTimer();
+    // Play win sound when level is completed
+    AudioService.instance.playWinSound();
     _completeLevel();
   }
 
@@ -363,7 +371,10 @@ class _GamePageState extends State<GamePage> {
           ],
         ),
         child: ElevatedButton(
-          onPressed: _exitGame,
+          onPressed: () {
+            AudioService.instance.playClickSound();
+            _exitGame();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -412,7 +423,10 @@ class _GamePageState extends State<GamePage> {
           ],
         ),
         child: ElevatedButton(
-          onPressed: _resetToInitialState,
+          onPressed: () {
+            AudioService.instance.playClickSound();
+            _resetToInitialState();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -515,7 +529,10 @@ class _GamePageState extends State<GamePage> {
   Widget _buildShuffleButton() {
     return GameButton(
       icon: Icons.shuffle,
-      onPressed: _shuffleGame, // Watch ad to earn shuffle reward
+      onPressed: () {
+        AudioService.instance.playClickSound();
+        _shuffleGame();
+      }, // Watch ad to earn shuffle reward
       gradient: const LinearGradient(
         colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
       ),
@@ -525,7 +542,10 @@ class _GamePageState extends State<GamePage> {
   Widget _buildGoalButton() {
     return GameButton(
       icon: Icons.flag,
-      onPressed: _showGoalModal,
+      onPressed: () {
+        AudioService.instance.playClickSound();
+        _showGoalModal();
+      },
       gradient: const LinearGradient(
         colors: [AppColors.success, AppColors.successDark],
       ),
@@ -591,6 +611,7 @@ class _GamePageState extends State<GamePage> {
               label: isGameComplete ? 'PLAY AGAIN' : 'NEXT LEVEL',
               icon: isGameComplete ? '🔄' : '🚀', // Next level shows ad 100% of the time
               onPressed: () {
+                AudioService.instance.playClickSound();
                 Navigator.of(context).pop();
                 if (isGameComplete) {
                   _playAgain();

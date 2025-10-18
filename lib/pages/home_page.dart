@@ -12,6 +12,7 @@ import '../widgets/modal_footer.dart';
 import '../widgets/instruction_item.dart';
 import '../widgets/ad_banner.dart';
 import '../services/level_progression_service.dart';
+import '../services/audio_service.dart';
 import 'game_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -55,6 +56,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _cardsAnimationController.forward();
     });
     _particleAnimationController.repeat();
+    
+    // Initialize audio service
+    AudioService.instance.initialize();
+    
     
     // Load unlocked levels
     _loadUnlockedLevels();
@@ -377,7 +382,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: _buildAnimatedButton(
           context,
           label: 'How to Play',
-          onPressed: () => _showHowToPlayModal(context),
+          onPressed: () {
+            AudioService.instance.playClickSound();
+            _showHowToPlayModal(context);
+          },
           gradient: const LinearGradient(
             colors: [AppColors.neutral, AppColors.neutralDark],
           ),
@@ -386,6 +394,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
 
   Widget _buildAnimatedButton(
     BuildContext context, {
@@ -642,7 +651,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               gridFontSize: gridFontSize,
               statusSpacing: statusSpacing,
               statusFontSize: statusFontSize,
-              onTap: isUnlocked ? () => _startLevel(context, level) : null,
+              onTap: isUnlocked ? () {
+                AudioService.instance.playClickSound();
+                _startLevel(context, level);
+              } : null,
             ),
           ),
         );
