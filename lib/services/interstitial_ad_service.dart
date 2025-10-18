@@ -128,6 +128,34 @@ class InterstitialAdService {
     return await showAdWithCustomProbability(1.0, onAdDismissed: onAdDismissed); // 100% probability
   }
 
+  /// Show interstitial ad for exit - try to load quickly, but don't wait too long
+  /// Returns true if ad was shown, false if not shown (due to not being ready)
+  Future<bool> showAdForExit({VoidCallback? onAdDismissed}) async {
+    // If ad is already loaded, show it immediately
+    if (_isAdReady && _interstitialAd != null) {
+      return await showAdWithCustomProbability(1.0, onAdDismissed: onAdDismissed);
+    }
+    
+    // Try to load ad quickly with minimal waiting
+    if (!_isLoading) {
+      await loadAd();
+      
+      // Wait briefly for ad to load (only 1 attempt with 200ms delay)
+      int attempts = 0;
+      while (!_isAdReady && attempts < 1) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        attempts++;
+      }
+    }
+    
+    // Show ad if it's ready, otherwise skip
+    if (_isAdReady && _interstitialAd != null) {
+      return await showAdWithCustomProbability(1.0, onAdDismissed: onAdDismissed);
+    }
+    
+    return false; // Skip ad if not ready to avoid delay
+  }
+
   /// Preload ad for better user experience
   Future<void> preloadAd() async {
     if (!_isAdReady && !_isLoading) {

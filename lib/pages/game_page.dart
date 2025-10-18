@@ -49,6 +49,9 @@ class _GamePageState extends State<GamePage> {
       });
       // Start the game immediately without showing start modal
       _initGame();
+      
+      // Show interstitial ad with 50% probability when entering game screen
+      _showEntryAd();
     }
   }
 
@@ -118,6 +121,16 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  void _showEntryAd() {
+    // Show interstitial ad with 50% probability when entering game screen
+    InterstitialAdService.instance.showAdWithProbability(
+      onAdDismissed: () {
+        // Ad was shown and dismissed - no additional action needed
+      },
+    );
+    // No callback needed if ad isn't shown - game continues normally
+  }
+
 
   Future<void> _nextLevelWithAd() async {
     // Show interstitial ad with 100% probability before next level
@@ -157,24 +170,24 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _exitGame() {
-    // Show interstitial ad with 50% probability before exiting
-    InterstitialAdService.instance.showAdWithProbability(
+  Future<void> _exitGame() async {
+    // Show interstitial ad for exit - only if already loaded (no waiting)
+    final adShown = await InterstitialAdService.instance.showAdForExit(
       onAdDismissed: () {
         // This callback runs after the ad is dismissed - exit immediately
         if (mounted) {
           Navigator.of(context).pop();
         }
       },
-    ).then((adShown) {
-      if (!adShown) {
-        // If ad wasn't shown (50% chance), exit immediately
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
+    );
+
+    if (!adShown) {
+      // If ad wasn't shown (not ready or loading error), exit immediately
+      if (mounted) {
+        Navigator.of(context).pop();
       }
-      // If ad was shown, exit will happen in the onAdDismissed callback
-    });
+    }
+    // If ad was shown, exit will happen in the onAdDismissed callback
   }
 
   void _moveTile(int row, int col) {
