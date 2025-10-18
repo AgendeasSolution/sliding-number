@@ -94,10 +94,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  // Responsive breakpoints and helper methods
+  bool _isSmallMobile(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return size.width < 360 || size.height < 600;
+  }
+  
+  bool _isMobile(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return size.width >= 360 && size.width < 768;
+  }
+  
+  bool _isLargeMobile(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return size.width >= 600 && size.width < 768;
+  }
+  
+  bool _isTablet(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return size.width >= 768 && size.width < 1024;
+  }
+  
+  bool _isDesktop(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return size.width >= 1024;
+  }
+  
+  // Get responsive values
+  double _getResponsiveValue(BuildContext context, {
+    required double smallMobile,
+    required double mobile,
+    required double largeMobile,
+    required double tablet,
+    required double desktop,
+  }) {
+    if (_isSmallMobile(context)) return smallMobile;
+    if (_isMobile(context)) return mobile;
+    if (_isLargeMobile(context)) return largeMobile;
+    if (_isTablet(context)) return tablet;
+    return desktop;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.height < 700;
     
     return Scaffold(
       body: Container(
@@ -112,29 +152,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     // Animated background particles
                     _buildAnimatedBackground(),
                     // Main content
-                    SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: screenSize.height - MediaQuery.of(context).padding.top - 70, // Account for ad banner space
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: _getResponsiveValue(context,
+                          smallMobile: 12.0,
+                          mobile: 16.0,
+                          largeMobile: 20.0,
+                          tablet: 24.0,
+                          desktop: 32.0,
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                            vertical: isSmallScreen ? 16.0 : 24.0,
-                          ),
-                          child: Column(
-                            children: [
-                              SizedBox(height: isSmallScreen ? 10 : 20),
-                              _buildHeader(context),
-                              SizedBox(height: isSmallScreen ? 15 : 25),
-                              _buildLevelGrid(context),
-                              SizedBox(height: isSmallScreen ? 20 : 30),
-                              _buildActionButtons(context),
-                              SizedBox(height: isSmallScreen ? 10 : 15),
-                            ],
-                          ),
+                        vertical: _getResponsiveValue(context,
+                          smallMobile: 8.0,
+                          mobile: 12.0,
+                          largeMobile: 16.0,
+                          tablet: 20.0,
+                          desktop: 24.0,
                         ),
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(height: _getResponsiveValue(context,
+                            smallMobile: 12.0,
+                            mobile: 16.0,
+                            largeMobile: 20.0,
+                            tablet: 24.0,
+                            desktop: 28.0,
+                          )),
+                          _buildHeader(context),
+                          SizedBox(height: _getResponsiveValue(context,
+                            smallMobile: 8.0,
+                            mobile: 12.0,
+                            largeMobile: 16.0,
+                            tablet: 20.0,
+                            desktop: 24.0,
+                          )),
+                          Expanded(child: _buildLevelGrid(context)),
+                          SizedBox(height: _getResponsiveValue(context,
+                            smallMobile: 12.0,
+                            mobile: 16.0,
+                            largeMobile: 20.0,
+                            tablet: 24.0,
+                            desktop: 28.0,
+                          )),
+                          _buildActionButtons(context),
+                        ],
                       ),
                     ),
                   ],
@@ -162,19 +223,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final isTablet = screenSize.width >= 768 && screenSize.width < 1024;
-    final isDesktop = screenSize.width >= 1024;
+    // Responsive font sizes for all screen sizes
+    final fontSize = _getResponsiveValue(context,
+      smallMobile: 24.0,
+      mobile: 28.0,
+      largeMobile: 32.0,
+      tablet: 36.0,
+      desktop: 44.0,
+    );
     
-    // Responsive font sizes - Made larger
-    double fontSize;
-    if (isDesktop) {
-      fontSize = 72; // 4.5rem (increased from 3.5rem)
-    } else if (isTablet) {
-      fontSize = 56; // 3.5rem (increased from 2.5rem)
-    } else {
-      fontSize = 44; // 2.75rem (increased from 2rem)
-    }
+    final letterSpacing = _getResponsiveValue(context,
+      smallMobile: 0.5,
+      mobile: 0.8,
+      largeMobile: 1.0,
+      tablet: 1.2,
+      desktop: 1.5,
+    );
+    
+    final lineWidth = _getResponsiveValue(context,
+      smallMobile: 60.0,
+      mobile: 70.0,
+      largeMobile: 80.0,
+      tablet: 90.0,
+      desktop: 100.0,
+    );
+    
+    final lineHeight = _getResponsiveValue(context,
+      smallMobile: 2.0,
+      mobile: 2.5,
+      largeMobile: 3.0,
+      tablet: 3.5,
+      desktop: 4.0,
+    );
     
     return AnimatedBuilder(
       animation: _titleAnimation,
@@ -191,23 +271,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   'Sliding Number',
                   style: GoogleFonts.inter(
                     fontSize: fontSize,
-                    fontWeight: FontWeight.w800, // 800 (extra bold)
-                    color: Colors.white, // This will be replaced by the gradient
-                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: letterSpacing,
                     shadows: [
                       Shadow(
                         color: AppColors.logoGradientStart.withValues(alpha: 0.5),
                         offset: const Offset(0, 0),
-                        blurRadius: 30,
+                        blurRadius: _getResponsiveValue(context,
+                          smallMobile: 15.0,
+                          mobile: 20.0,
+                          largeMobile: 25.0,
+                          tablet: 30.0,
+                          desktop: 35.0,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: _getResponsiveValue(context,
+                smallMobile: 4.0,
+                mobile: 6.0,
+                largeMobile: 8.0,
+                tablet: 10.0,
+                desktop: 12.0,
+              )),
               Container(
-                height: 3,
-                width: 80,
+                height: lineHeight,
+                width: lineWidth,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
@@ -225,17 +317,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 
   Widget _buildLevelGrid(BuildContext context) {
+    // Responsive grid configuration
+    final crossAxisCount = _getResponsiveValue(context,
+      smallMobile: 3.0,
+      mobile: 3.0,
+      largeMobile: 4.0,
+      tablet: 5.0,
+      desktop: 6.0,
+    ).toInt();
+    
+    final crossAxisSpacing = _getResponsiveValue(context,
+      smallMobile: 8.0,
+      mobile: 10.0,
+      largeMobile: 12.0,
+      tablet: 14.0,
+      desktop: 16.0,
+    );
+    
+    final mainAxisSpacing = _getResponsiveValue(context,
+      smallMobile: 8.0,
+      mobile: 10.0,
+      largeMobile: 12.0,
+      tablet: 14.0,
+      desktop: 16.0,
+    );
+    
+    final childAspectRatio = _getResponsiveValue(context,
+      smallMobile: 1.0,
+      mobile: 1.0,
+      largeMobile: 1.0,
+      tablet: 1.0,
+      desktop: 1.0,
+    );
+    
     return AnimatedBuilder(
       animation: _cardsAnimation,
       builder: (context, child) {
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.85,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: crossAxisSpacing,
+            mainAxisSpacing: mainAxisSpacing,
+            childAspectRatio: childAspectRatio,
           ),
           itemCount: AppConstants.maxLevel,
           itemBuilder: (context, index) {
@@ -255,9 +380,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    final buttonWidth = _getResponsiveValue(context,
+      smallMobile: 140.0,
+      mobile: 150.0,
+      largeMobile: 160.0,
+      tablet: 170.0,
+      desktop: 180.0,
+    );
+    
     return Center(
       child: SizedBox(
-        width: 200,
+        width: buttonWidth,
         child: _buildAnimatedButton(
           context,
           label: 'How to Play',
@@ -288,7 +421,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               color: color,
               gradient: gradient,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                smallMobile: 16.0,
+                mobile: 18.0,
+                largeMobile: 20.0,
+                tablet: 22.0,
+                desktop: 24.0,
+              )),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
@@ -319,21 +458,54 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 onTap: onPressed,
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  padding: EdgeInsets.symmetric(
+                    vertical: _getResponsiveValue(context,
+                      smallMobile: 10.0,
+                      mobile: 12.0,
+                      largeMobile: 14.0,
+                      tablet: 16.0,
+                      desktop: 18.0,
+                    ),
+                    horizontal: _getResponsiveValue(context,
+                      smallMobile: 12.0,
+                      mobile: 14.0,
+                      largeMobile: 16.0,
+                      tablet: 18.0,
+                      desktop: 20.0,
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         icon,
-                        style: const TextStyle(fontSize: 22),
+                        style: TextStyle(fontSize: _getResponsiveValue(context,
+                          smallMobile: 16.0,
+                          mobile: 18.0,
+                          largeMobile: 20.0,
+                          tablet: 22.0,
+                          desktop: 24.0,
+                        )),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: _getResponsiveValue(context,
+                        smallMobile: 6.0,
+                        mobile: 8.0,
+                        largeMobile: 10.0,
+                        tablet: 12.0,
+                        desktop: 14.0,
+                      )),
                       Flexible(
                         child: Text(
                           label,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: _getResponsiveValue(context,
+                              smallMobile: 12.0,
+                              mobile: 14.0,
+                              largeMobile: 16.0,
+                              tablet: 18.0,
+                              desktop: 20.0,
+                            ),
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                             shadows: [
@@ -364,6 +536,87 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final isUnlocked = _unlockedLevels.contains(level);
     final isCompleted = _completedLevels.contains(level);
     
+    // Calculate responsive values
+    final cardPadding = _getResponsiveValue(context,
+      smallMobile: 4.0,
+      mobile: 5.0,
+      largeMobile: 6.0,
+      tablet: 8.0,
+      desktop: 10.0,
+    );
+    
+    final iconSize = _getResponsiveValue(context,
+      smallMobile: 28.0,
+      mobile: 32.0,
+      largeMobile: 36.0,
+      tablet: 40.0,
+      desktop: 44.0,
+    );
+    
+    final checkmarkSpacing = _getResponsiveValue(context,
+      smallMobile: 1.0,
+      mobile: 1.5,
+      largeMobile: 2.0,
+      tablet: 2.5,
+      desktop: 3.0,
+    );
+    
+    final checkmarkSize = _getResponsiveValue(context,
+      smallMobile: 12.0,
+      mobile: 14.0,
+      largeMobile: 16.0,
+      tablet: 18.0,
+      desktop: 20.0,
+    );
+    
+    final gridSpacing = _getResponsiveValue(context,
+      smallMobile: 1.0,
+      mobile: 1.5,
+      largeMobile: 2.0,
+      tablet: 2.5,
+      desktop: 3.0,
+    );
+    
+    final gridPaddingH = _getResponsiveValue(context,
+      smallMobile: 3.0,
+      mobile: 4.0,
+      largeMobile: 5.0,
+      tablet: 6.0,
+      desktop: 7.0,
+    );
+    
+    final gridPaddingV = _getResponsiveValue(context,
+      smallMobile: 1.0,
+      mobile: 1.5,
+      largeMobile: 2.0,
+      tablet: 2.5,
+      desktop: 3.0,
+    );
+    
+    final gridFontSize = _getResponsiveValue(context,
+      smallMobile: 7.0,
+      mobile: 8.0,
+      largeMobile: 9.0,
+      tablet: 10.0,
+      desktop: 11.0,
+    );
+    
+    final statusSpacing = _getResponsiveValue(context,
+      smallMobile: 0.5,
+      mobile: 1.0,
+      largeMobile: 1.5,
+      tablet: 2.0,
+      desktop: 2.5,
+    );
+    
+    final statusFontSize = _getResponsiveValue(context,
+      smallMobile: 6.0,
+      mobile: 7.0,
+      largeMobile: 8.0,
+      tablet: 9.0,
+      desktop: 10.0,
+    );
+    
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 800 + (index * 100)),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -378,6 +631,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               difficulty: difficulty,
               isUnlocked: isUnlocked,
               isCompleted: isCompleted,
+              cardPadding: cardPadding,
+              iconSize: iconSize,
+              checkmarkSpacing: checkmarkSpacing,
+              checkmarkSize: checkmarkSize,
+              gridSpacing: gridSpacing,
+              gridPaddingH: gridPaddingH,
+              gridPaddingV: gridPaddingV,
+              gridFontSize: gridFontSize,
+              statusSpacing: statusSpacing,
+              statusFontSize: statusFontSize,
               onTap: isUnlocked ? () => _startLevel(context, level) : null,
             ),
           ),
@@ -750,6 +1013,16 @@ class _LevelCard extends StatefulWidget {
   final bool isUnlocked;
   final bool isCompleted;
   final VoidCallback? onTap;
+  final double cardPadding;
+  final double iconSize;
+  final double checkmarkSpacing;
+  final double checkmarkSize;
+  final double gridSpacing;
+  final double gridPaddingH;
+  final double gridPaddingV;
+  final double gridFontSize;
+  final double statusSpacing;
+  final double statusFontSize;
 
   const _LevelCard({
     required this.level,
@@ -758,6 +1031,16 @@ class _LevelCard extends StatefulWidget {
     required this.isUnlocked,
     required this.isCompleted,
     this.onTap,
+    required this.cardPadding,
+    required this.iconSize,
+    required this.checkmarkSpacing,
+    required this.checkmarkSize,
+    required this.gridSpacing,
+    required this.gridPaddingH,
+    required this.gridPaddingV,
+    required this.gridFontSize,
+    required this.statusSpacing,
+    required this.statusFontSize,
   });
 
   @override
@@ -828,15 +1111,16 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                 child: InkWell(
                   onTap: widget.isUnlocked ? widget.onTap : null,
                   borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
+                    child: Container(
+                    padding: EdgeInsets.all(widget.cardPadding),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Level number with glassmorphism effect, lock icon, or checkmark
                         Container(
-                          width: 48,
-                          height: 48,
+                          width: widget.iconSize,
+                          height: widget.iconSize,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: _getIconContainerGradient(),
@@ -856,19 +1140,22 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                         ),
                         // Checkmark icon for completed levels (outside the circle)
                         if (widget.isCompleted) ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: widget.checkmarkSpacing),
                           Icon(
                             Icons.check_circle,
                             color: AppColors.completedAccent,
-                            size: 20 + (_hoverAnimation.value * 2),
+                            size: widget.checkmarkSize + (_hoverAnimation.value * 2),
                           ),
                         ],
                         // Only show grid size and difficulty for non-completed levels
                         if (!widget.isCompleted) ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: widget.gridSpacing),
                           // Grid size indicator with enhanced styling
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: widget.gridPaddingH,
+                              vertical: widget.gridPaddingV,
+                            ),
                             decoration: BoxDecoration(
                               color: widget.isUnlocked 
                                 ? Colors.white.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.05))
@@ -884,7 +1171,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                             child: Text(
                               '${widget.gridSize}×${widget.gridSize}',
                               style: TextStyle(
-                                fontSize: 12 + (_hoverAnimation.value * 1),
+                                fontSize: widget.gridFontSize + (_hoverAnimation.value * 1),
                                 fontWeight: FontWeight.bold,
                                 color: widget.isUnlocked ? Colors.white : Colors.grey.shade400,
                                 letterSpacing: 0.5,
@@ -898,12 +1185,12 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                               ),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: widget.statusSpacing),
                           // Difficulty indicator or locked text
                           Text(
                             _getStatusText(),
                             style: TextStyle(
-                              fontSize: 10 + (_hoverAnimation.value * 0.5),
+                              fontSize: widget.statusFontSize + (_hoverAnimation.value * 0.5),
                               fontWeight: FontWeight.w600,
                               color: _getStatusTextColor(),
                               letterSpacing: 0.3,
