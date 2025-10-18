@@ -345,11 +345,39 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget _buildExitButton() {
-    return GameButton(
-      icon: Icons.arrow_back,
-      onPressed: _exitGame, // Shows ad 50% of the time before exiting
-      gradient: const LinearGradient(
-        colors: [AppColors.error, AppColors.errorDark],
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.error, AppColors.errorDark],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.error.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: _exitGame,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Icon(
+            Icons.arrow_back,
+            color: AppColors.textWhite,
+            size: 18,
+          ),
+        ),
       ),
     );
   }
@@ -366,11 +394,39 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget _buildResetButton() {
-    return GameButton(
-      icon: Icons.refresh,
-      onPressed: _resetToInitialState, // Shows interstitial ad 50% of the time
-      gradient: const LinearGradient(
-        colors: [AppColors.warning, AppColors.warningDark],
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.warning, AppColors.warningDark],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.warning.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: _resetToInitialState,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Icon(
+            Icons.refresh,
+            color: AppColors.textWhite,
+            size: 18,
+          ),
+        ),
       ),
     );
   }
