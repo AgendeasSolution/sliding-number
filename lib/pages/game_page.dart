@@ -118,15 +118,6 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  Future<void> _nextLevel() async {
-    if (_gameState != null && _gameState!.currentLevel < _gameState!.maxLevel) {
-      final newGameState = await GameService.nextLevel(_gameState!);
-      setState(() {
-        _gameState = newGameState;
-        _initGame();
-      });
-    }
-  }
 
   Future<void> _nextLevelWithAd() async {
     // Show interstitial ad with 100% probability before next level

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
-import '../constants/app_colors.dart';
 import '../models/game_state.dart';
 import 'game_tile.dart';
 
