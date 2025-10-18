@@ -33,8 +33,7 @@ class LevelProgressionService {
       final String unlockedLevelsJson = json.encode(unlockedLevels);
       await prefs.setString(_unlockedLevelsKey, unlockedLevelsJson);
     } catch (e) {
-      // Handle error silently or log it
-      print('Error saving unlocked levels: $e');
+      // Handle error silently
     }
   }
 
@@ -103,7 +102,7 @@ class LevelProgressionService {
       final String completedLevelsJson = json.encode(completedLevels);
       await prefs.setString(_completedLevelsKey, completedLevelsJson);
     } catch (e) {
-      print('Error saving completed levels: $e');
+      // Handle error silently
     }
   }
 

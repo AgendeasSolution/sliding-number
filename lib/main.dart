@@ -10,9 +10,7 @@ void main() async {
   // Initialize Google Mobile Ads SDK with error handling
   try {
     await MobileAds.instance.initialize();
-    print('Google Mobile Ads initialized successfully');
   } catch (e) {
-    print('Failed to initialize Google Mobile Ads: $e');
     // Continue running the app even if ads fail to initialize
   }
   

@@ -9,7 +9,6 @@ import '../theme/app_theme.dart';
 import '../utils/game_utils.dart';
 import '../widgets/game_board.dart';
 import '../widgets/game_button.dart';
-import '../widgets/stat_item.dart';
 import '../widgets/modal_container.dart';
 import '../widgets/modal_header.dart';
 import '../widgets/modal_footer.dart';
@@ -165,12 +164,10 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _exitGame() {
-    print('Exit button pressed - attempting to show ad...');
     // Show interstitial ad with 50% probability before exiting
     InterstitialAdService.instance.showAdWithProbability(
       onAdDismissed: () {
         // This callback runs after the ad is dismissed - exit immediately
-        print('Ad dismissed - exiting immediately');
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -178,7 +175,6 @@ class _GamePageState extends State<GamePage> {
     ).then((adShown) {
       if (!adShown) {
         // If ad wasn't shown (50% chance), exit immediately
-        print('Ad not shown - exiting immediately');
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -213,8 +209,6 @@ class _GamePageState extends State<GamePage> {
 
   void _shuffleGame() async {
     if (_gameState != null) {
-      print('Shuffle button pressed - attempting to show ad...');
-      
       // First, ensure we have an ad loaded
       await InterstitialAdService.instance.preloadAd();
       
@@ -222,16 +216,12 @@ class _GamePageState extends State<GamePage> {
       final adShown = await InterstitialAdService.instance.showAdAlways(
         onAdDismissed: () {
           // This callback runs after the ad is dismissed - user gets the reward
-          print('Ad dismissed - giving shuffle reward');
           _performShuffle();
         },
       );
-
-      print('Ad show result: $adShown');
       
       if (!adShown) {
         // If ad wasn't shown (due to loading error), still give the reward
-        print('Ad not shown - giving shuffle reward anyway');
         _performShuffle();
       }
       // If ad was shown, shuffle will happen in the onAdDismissed callback
