@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'dart:math' as math;
-import 'dart:math' show Point;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
@@ -11,11 +10,8 @@ import '../widgets/modal_container.dart';
 import '../widgets/modal_header.dart';
 import '../widgets/modal_footer.dart';
 import '../widgets/instruction_item.dart';
-import '../widgets/goal_board.dart';
 import '../widgets/ad_banner.dart';
-import '../services/game_service.dart';
 import '../services/level_progression_service.dart';
-import '../models/game_state.dart';
 import 'game_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,10 +22,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late AnimationController _titleAnimationController;
   late AnimationController _cardsAnimationController;
   late AnimationController _particleAnimationController;
-  late Animation<double> _titleAnimation;
   late Animation<double> _cardsAnimation;
   late Animation<double> _particleAnimation;
   
@@ -39,10 +33,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _titleAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
     _cardsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -52,10 +42,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _titleAnimation = CurvedAnimation(
-      parent: _titleAnimationController,
-      curve: Curves.elasticOut,
-    );
     _cardsAnimation = CurvedAnimation(
       parent: _cardsAnimationController,
       curve: Curves.easeOutBack,
@@ -65,7 +51,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       curve: Curves.linear,
     );
 
-    _titleAnimationController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
       _cardsAnimationController.forward();
     });
@@ -77,7 +62,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _titleAnimationController.dispose();
     _cardsAnimationController.dispose();
     _particleAnimationController.dispose();
     super.dispose();
@@ -115,10 +99,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return size.width >= 768 && size.width < 1024;
   }
   
-  bool _isDesktop(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return size.width >= 1024;
-  }
   
   // Get responsive values
   double _getResponsiveValue(BuildContext context, {
@@ -137,8 +117,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    
     return Scaffold(
       body: Container(
         decoration: AppTheme.backgroundGradient,
@@ -172,29 +150,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 12.0,
-                            mobile: 16.0,
-                            largeMobile: 20.0,
-                            tablet: 24.0,
-                            desktop: 28.0,
+                            smallMobile: 20.0,
+                            mobile: 24.0,
+                            largeMobile: 28.0,
+                            tablet: 32.0,
+                            desktop: 36.0,
                           )),
                           _buildHeader(context),
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 8.0,
-                            mobile: 12.0,
-                            largeMobile: 16.0,
-                            tablet: 20.0,
-                            desktop: 24.0,
+                            smallMobile: 36.0,
+                            mobile: 42.0,
+                            largeMobile: 48.0,
+                            tablet: 54.0,
+                            desktop: 60.0,
                           )),
-                          Expanded(child: _buildLevelGrid(context)),
-                          SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 12.0,
-                            mobile: 16.0,
-                            largeMobile: 20.0,
-                            tablet: 24.0,
-                            desktop: 28.0,
-                          )),
-                          _buildActionButtons(context),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Expanded(child: _buildLevelGrid(context)),
+                                Transform.translate(
+                                  offset: const Offset(0, -20),
+                                  child: _buildActionButtons(context),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -225,11 +205,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildHeader(BuildContext context) {
     // Responsive font sizes for all screen sizes
     final fontSize = _getResponsiveValue(context,
-      smallMobile: 24.0,
-      mobile: 28.0,
-      largeMobile: 32.0,
-      tablet: 36.0,
-      desktop: 44.0,
+      smallMobile: 32.0,
+      mobile: 36.0,
+      largeMobile: 42.0,
+      tablet: 48.0,
+      desktop: 56.0,
     );
     
     final letterSpacing = _getResponsiveValue(context,
@@ -256,61 +236,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 4.0,
     );
     
-    return AnimatedBuilder(
-      animation: _titleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _titleAnimation.value,
-          child: Column(
-            children: [
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                ).createShader(bounds),
-                child: Text(
-                  'Sliding Number',
-                  style: GoogleFonts.inter(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: letterSpacing,
-                    shadows: [
-                      Shadow(
-                        color: AppColors.logoGradientStart.withValues(alpha: 0.5),
-                        offset: const Offset(0, 0),
-                        blurRadius: _getResponsiveValue(context,
-                          smallMobile: 15.0,
-                          mobile: 20.0,
-                          largeMobile: 25.0,
-                          tablet: 30.0,
-                          desktop: 35.0,
-                        ),
-                      ),
-                    ],
+    final topMargin = _getResponsiveValue(context,
+      smallMobile: 20.0,
+      mobile: 24.0,
+      largeMobile: 28.0,
+      tablet: 32.0,
+      desktop: 36.0,
+    );
+    
+    return Container(
+      margin: EdgeInsets.only(top: topMargin),
+      child: Column(
+        children: [
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+            ).createShader(bounds),
+            child: Text(
+              'Sliding Number',
+              style: GoogleFonts.inter(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: letterSpacing,
+                shadows: [
+                  Shadow(
+                    color: AppColors.logoGradientStart.withValues(alpha: 0.5),
+                    offset: const Offset(0, 0),
+                    blurRadius: _getResponsiveValue(context,
+                      smallMobile: 15.0,
+                      mobile: 20.0,
+                      largeMobile: 25.0,
+                      tablet: 30.0,
+                      desktop: 35.0,
+                    ),
                   ),
-                ),
+                ],
               ),
-              SizedBox(height: _getResponsiveValue(context,
-                smallMobile: 4.0,
-                mobile: 6.0,
-                largeMobile: 8.0,
-                tablet: 10.0,
-                desktop: 12.0,
-              )),
-              Container(
-                height: lineHeight,
-                width: lineWidth,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      },
+          SizedBox(height: _getResponsiveValue(context,
+            smallMobile: 4.0,
+            mobile: 6.0,
+            largeMobile: 8.0,
+            tablet: 10.0,
+            desktop: 12.0,
+          )),
+          Container(
+            height: lineHeight,
+            width: lineWidth,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -343,11 +326,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     
     final childAspectRatio = _getResponsiveValue(context,
-      smallMobile: 1.0,
-      mobile: 1.0,
-      largeMobile: 1.0,
-      tablet: 1.0,
-      desktop: 1.0,
+      smallMobile: 0.9,
+      mobile: 0.9,
+      largeMobile: 0.9,
+      tablet: 0.9,
+      desktop: 0.9,
     );
     
     return AnimatedBuilder(
@@ -396,9 +379,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: 'How to Play',
           onPressed: () => _showHowToPlayModal(context),
           gradient: const LinearGradient(
-            colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+            colors: [AppColors.neutral, AppColors.neutralDark],
           ),
-          icon: '🎮',
+          icon: Icons.help_outline,
         ),
       ),
     );
@@ -410,7 +393,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     required VoidCallback onPressed,
     Color? color,
     Gradient? gradient,
-    required String icon,
+    required dynamic icon,
   }) {
     return AnimatedBuilder(
       animation: _cardsAnimation,
@@ -422,11 +405,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               color: color,
               gradient: gradient,
               borderRadius: BorderRadius.circular(_getResponsiveValue(context,
-                smallMobile: 16.0,
-                mobile: 18.0,
-                largeMobile: 20.0,
-                tablet: 22.0,
-                desktop: 24.0,
+                smallMobile: 8.0,
+                mobile: 10.0,
+                largeMobile: 12.0,
+                tablet: 14.0,
+                desktop: 16.0,
               )),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.2),
@@ -456,38 +439,57 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               color: Colors.transparent,
               child: InkWell(
                 onTap: onPressed,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                  smallMobile: 8.0,
+                  mobile: 10.0,
+                  largeMobile: 12.0,
+                  tablet: 14.0,
+                  desktop: 16.0,
+                )),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     vertical: _getResponsiveValue(context,
-                      smallMobile: 10.0,
-                      mobile: 12.0,
-                      largeMobile: 14.0,
-                      tablet: 16.0,
-                      desktop: 18.0,
+                      smallMobile: 6.0,
+                      mobile: 8.0,
+                      largeMobile: 10.0,
+                      tablet: 12.0,
+                      desktop: 14.0,
                     ),
                     horizontal: _getResponsiveValue(context,
-                      smallMobile: 12.0,
-                      mobile: 14.0,
-                      largeMobile: 16.0,
-                      tablet: 18.0,
-                      desktop: 20.0,
+                      smallMobile: 8.0,
+                      mobile: 10.0,
+                      largeMobile: 12.0,
+                      tablet: 14.0,
+                      desktop: 16.0,
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        icon,
-                        style: TextStyle(fontSize: _getResponsiveValue(context,
-                          smallMobile: 16.0,
-                          mobile: 18.0,
-                          largeMobile: 20.0,
-                          tablet: 22.0,
-                          desktop: 24.0,
-                        )),
-                      ),
+                      if (icon is String)
+                        Text(
+                          icon,
+                          style: TextStyle(fontSize: _getResponsiveValue(context,
+                            smallMobile: 16.0,
+                            mobile: 18.0,
+                            largeMobile: 20.0,
+                            tablet: 22.0,
+                            desktop: 24.0,
+                          )),
+                        )
+                      else if (icon is IconData)
+                        Icon(
+                          icon,
+                          size: _getResponsiveValue(context,
+                            smallMobile: 16.0,
+                            mobile: 18.0,
+                            largeMobile: 20.0,
+                            tablet: 22.0,
+                            desktop: 24.0,
+                          ),
+                          color: Colors.white,
+                        ),
                       SizedBox(width: _getResponsiveValue(context,
                         smallMobile: 6.0,
                         mobile: 8.0,
@@ -507,7 +509,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               desktop: 20.0,
                             ),
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: Colors.white,
                             shadows: [
                               Shadow(
                                 color: Colors.black26,
@@ -532,7 +534,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget _buildLevelCard(BuildContext context, int level, int gridSize, int index) {
     final difficulty = _getDifficultyText(gridSize);
-    final difficultyColor = _getDifficultyColor(gridSize);
     final isUnlocked = _unlockedLevels.contains(level);
     final isCompleted = _completedLevels.contains(level);
     
@@ -554,11 +555,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     
     final checkmarkSpacing = _getResponsiveValue(context,
-      smallMobile: 1.0,
-      mobile: 1.5,
-      largeMobile: 2.0,
-      tablet: 2.5,
-      desktop: 3.0,
+      smallMobile: 4.0,
+      mobile: 5.0,
+      largeMobile: 6.0,
+      tablet: 7.0,
+      desktop: 8.0,
     );
     
     final checkmarkSize = _getResponsiveValue(context,
@@ -649,24 +650,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Color> _getLevelGradient(int level) {
-    if (level <= 3) {
-      return [AppColors.success, AppColors.successDark];
-    } else if (level <= 6) {
-      return [AppColors.warning, AppColors.warningDark];
-    } else if (level <= 9) {
-      return [AppColors.info, AppColors.infoDark];
-    } else {
-      return [AppColors.error, AppColors.errorDark];
-    }
-  }
-
-  Color _getDifficultyColor(int gridSize) {
-    if (gridSize <= 4) return AppColors.success;
-    if (gridSize <= 6) return AppColors.warning;
-    if (gridSize <= 8) return AppColors.info;
-    return AppColors.error;
-  }
 
   int _getGridSize(int level) {
     return level + 2; // Level 1 = 3x3, Level 2 = 4x4, etc.
@@ -748,262 +731,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _showGoalModal(BuildContext context) async {
-    // Create a sample game state for level 1 to show the goal
-    final sampleGameState = await GameService.initializeGame(1);
-    
-    _showModalDialog(
-      context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const ModalHeader(
-            title: '🎯 Goal',
-            color: AppColors.success,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const Text(
-                  'Arrange the numbers in this order:',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 20),
-                GoalBoard(gameState: sampleGameState),
-                const SizedBox(height: 16),
-                const Text(
-                  'Each level increases the grid size, making it more challenging!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          ModalFooter(
-            child: GameButton(
-              label: '✕ Close',
-              onPressed: () => Navigator.of(context).pop(),
-              gradient: const LinearGradient(
-                colors: [AppColors.neutral, AppColors.neutralDark],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showGameOverModal(BuildContext context) {
-    _showModalDialog(
-      context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const ModalHeader(
-            title: '🎉 Level 1 Complete!',
-            color: AppColors.success,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                // Game stats without background
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildGameStatItem('⏱️', 'TIME', '45s'),
-                    Container(
-                      height: 40,
-                      width: 1,
-                      color: AppColors.primaryGold.withValues(alpha: 0.3),
-                    ),
-                    _buildGameStatItem('🎯', 'MOVES', '127'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          ModalFooter(
-            child: _buildGameButton(
-              context,
-              label: 'NEXT LEVEL',
-              icon: '🚀',
-              onPressed: () {
-                Navigator.of(context).pop();
-                _startLevel(context, 2);
-              },
-              isPrimary: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGameStatItem(String icon, String label, String value) {
-    return Column(
-      children: [
-        Text(
-          icon,
-          style: const TextStyle(fontSize: 32),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.primaryGold,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-            letterSpacing: 1,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGameButton(
-    BuildContext context, {
-    required String label,
-    required String icon,
-    required VoidCallback onPressed,
-    required bool isPrimary,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 60,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: isPrimary
-              ? const LinearGradient(
-                  colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : LinearGradient(
-                  colors: [
-                    Colors.grey.shade800,
-                    Colors.grey.shade900,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isPrimary
-                ? AppColors.logoGradientEnd.withValues(alpha: 0.8)
-                : Colors.grey.shade600,
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isPrimary
-                  ? AppColors.logoGradientEnd.withValues(alpha: 0.4)
-                  : Colors.black.withValues(alpha: 0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
-              spreadRadius: 2,
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon.isNotEmpty) ...[
-                    Text(
-                      icon,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: isPrimary ? Colors.black : Colors.white,
-                        letterSpacing: 1.0,
-                        shadows: isPrimary
-                            ? [
-                                const Shadow(
-                                  color: Colors.white24,
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                ),
-                              ]
-                            : [
-                                const Shadow(
-                                  color: Colors.black54,
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                ),
-                              ],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String icon, String label, String value) {
-    return Column(
-      children: [
-        Text(
-          icon,
-          style: const TextStyle(fontSize: 24),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _LevelCard extends StatefulWidget {
@@ -1149,7 +876,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                         ],
                         // Only show grid size and difficulty for non-completed levels
                         if (!widget.isCompleted) ...[
-                          SizedBox(height: widget.gridSpacing),
+                          SizedBox(height: widget.gridSpacing + 4.0),
                           // Grid size indicator with enhanced styling
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -1185,7 +912,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                               ),
                             ),
                           ),
-                          SizedBox(height: widget.statusSpacing),
+                          SizedBox(height: widget.statusSpacing + 6.0),
                           // Difficulty indicator or locked text
                           Text(
                             _getStatusText(),
@@ -1249,32 +976,32 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
   List<BoxShadow> _getCardShadows() {
     if (widget.isCompleted) {
       return [
-        // Main glow shadow with hover enhancement
+        // Main glow shadow with reduced intensity
         BoxShadow(
-          color: AppColors.completed.withValues(alpha: 0.8 + (_hoverAnimation.value * 0.2)),
-          blurRadius: 30 + (_hoverAnimation.value * 10),
-          offset: const Offset(0, 12),
-          spreadRadius: 6 + (_hoverAnimation.value * 2),
+          color: AppColors.completed.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
+          blurRadius: 15 + (_hoverAnimation.value * 5),
+          offset: const Offset(0, 6),
+          spreadRadius: 2 + (_hoverAnimation.value * 1),
         ),
-        // Gold accent glow
+        // Gold accent glow with reduced intensity
         BoxShadow(
-          color: AppColors.completedAccent.withValues(alpha: 0.6 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 40 + (_hoverAnimation.value * 15),
-          offset: const Offset(0, 18),
-          spreadRadius: 8 + (_hoverAnimation.value * 3),
+          color: AppColors.completedAccent.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 20 + (_hoverAnimation.value * 8),
+          offset: const Offset(0, 9),
+          spreadRadius: 3 + (_hoverAnimation.value * 1),
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 20 + (_hoverAnimation.value * 5),
-          offset: const Offset(0, 8),
+          color: Colors.black.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 12 + (_hoverAnimation.value * 3),
+          offset: const Offset(0, 4),
         ),
-        // Inner glow effect
+        // Inner glow effect with reduced intensity
         BoxShadow(
-          color: Colors.white.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 15 + (_hoverAnimation.value * 5),
-          offset: const Offset(0, -3),
-          spreadRadius: -3,
+          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 8 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, -2),
+          spreadRadius: -2,
         ),
       ];
     } else if (widget.isUnlocked) {
