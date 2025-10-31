@@ -41,8 +41,12 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3772142815301617~1212490108</string>
+	<string>ca-app-pub-3772142815301617~9995652971</string>
 	<key>UIRequiresFullScreen</key>
     <true/>
+	<key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+    </array>
 </dict>
 </plist>
