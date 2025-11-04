@@ -76,8 +76,8 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
   google_mobile_ads: cab27248050510554aa646195eacc393ce7406ad
   GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
+  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
 PODFILE CHECKSUM: 6f50b9a9868fecdefddedfddef51206cfbba4d44
