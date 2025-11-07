@@ -134,30 +134,44 @@ class _OtherGamesPageState extends State<OtherGamesPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: AppTheme.backgroundGradient,
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    _buildAnimatedBackground(),
-                    Column(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Container(
+            decoration: AppTheme.backgroundGradient,
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Stack(
                       children: [
-                        _buildHeader(context),
-                        Expanded(
-                          child: _buildGamesGrid(context),
+                        _buildAnimatedBackground(),
+                        Column(
+                          children: [
+                            _buildHeader(context),
+                            Expanded(
+                              child: _buildGamesGrid(context),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const AdBanner(),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              top: false,
+              child: const AdBanner(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -197,7 +211,7 @@ class _OtherGamesPageState extends State<OtherGamesPage>
           Expanded(
             child: Center(
               child: Text(
-                'Games By FGTP Labs',
+                'Games by FGTP Labs',
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
@@ -315,11 +329,11 @@ class _OtherGamesPageState extends State<OtherGamesPage>
                 desktop: 12.0,
               ),
               bottom: _getResponsiveValue(context,
-                smallMobile: 16.0,
-                mobile: 20.0,
-                largeMobile: 24.0,
-                tablet: 28.0,
-                desktop: 32.0,
+                smallMobile: 100.0,
+                mobile: 100.0,
+                largeMobile: 100.0,
+                tablet: 100.0,
+                desktop: 100.0,
               ),
             ),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
