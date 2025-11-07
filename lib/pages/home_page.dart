@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_constants.dart';
 import '../theme/app_theme.dart';
@@ -136,32 +137,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     // Animated background particles
                     _buildAnimatedBackground(),
-                    // Sound toggle button in top-right corner
-                    Positioned(
-                      top: _getResponsiveValue(context,
-                        smallMobile: 8.0,
-                        mobile: 12.0,
-                        largeMobile: 16.0,
-                        tablet: 20.0,
-                        desktop: 24.0,
-                      ),
-                      right: _getResponsiveValue(context,
-                        smallMobile: 12.0,
-                        mobile: 16.0,
-                        largeMobile: 20.0,
-                        tablet: 24.0,
-                        desktop: 32.0,
-                      ),
-                      child: SoundToggleButton(
-                        size: _getResponsiveValue(context,
-                          smallMobile: 28.0,
-                          mobile: 30.0,
-                          largeMobile: 32.0,
-                          tablet: 34.0,
-                          desktop: 36.0,
-                        ),
-                      ),
-                    ),
                     // Main content
                     Padding(
                       padding: EdgeInsets.symmetric(
@@ -183,11 +158,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 20.0,
-                            mobile: 24.0,
-                            largeMobile: 28.0,
-                            tablet: 32.0,
-                            desktop: 36.0,
+                            smallMobile: 8.0,
+                            mobile: 12.0,
+                            largeMobile: 16.0,
+                            tablet: 20.0,
+                            desktop: 24.0,
                           )),
                           _buildHeader(context),
                           SizedBox(height: _getResponsiveValue(context,
@@ -201,10 +176,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             child: Column(
                               children: [
                                 Expanded(child: _buildLevelGrid(context)),
-                                Transform.translate(
-                                  offset: const Offset(0, -20),
-                                  child: _buildActionButtons(context),
-                                ),
+                                SizedBox(height: _getResponsiveValue(context,
+                                  smallMobile: 12.0,
+                                  mobile: 16.0,
+                                  largeMobile: 20.0,
+                                  tablet: 24.0,
+                                  desktop: 28.0,
+                                )),
+                                _buildActionButtons(context),
                               ],
                             ),
                           ),
@@ -270,11 +249,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     
     final topMargin = _getResponsiveValue(context,
-      smallMobile: 20.0,
-      mobile: 24.0,
-      largeMobile: 28.0,
-      tablet: 32.0,
-      desktop: 36.0,
+      smallMobile: 8.0,
+      mobile: 12.0,
+      largeMobile: 16.0,
+      tablet: 20.0,
+      desktop: 24.0,
     );
     
     return Container(
@@ -366,31 +345,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 0.9,
     );
     
-    return AnimatedBuilder(
-      animation: _cardsAnimation,
-      builder: (context, child) {
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: crossAxisSpacing,
-            mainAxisSpacing: mainAxisSpacing,
-            childAspectRatio: childAspectRatio,
-          ),
-          itemCount: AppConstants.maxLevel,
-          itemBuilder: (context, index) {
-            final level = index + 1;
-            final gridSize = _getGridSize(level);
-            return Transform.scale(
-              scale: _cardsAnimation.value,
-              child: Transform.translate(
-                offset: Offset(0, (1 - _cardsAnimation.value) * 50),
-                child: _buildLevelCard(context, level, gridSize, index),
-              ),
-            );
-          },
-        );
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: crossAxisSpacing,
+        mainAxisSpacing: mainAxisSpacing,
+        childAspectRatio: childAspectRatio,
+      ),
+      itemCount: AppConstants.maxLevel,
+      itemBuilder: (context, index) {
+        final level = index + 1;
+        final gridSize = _getGridSize(level);
+        return _buildLevelCard(context, level, gridSize, index);
       },
     );
   }
@@ -412,15 +380,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 28.0,
     );
     
+    final gamesButtonWidth = _getResponsiveValue(context,
+      smallMobile: 130.0,
+      mobile: 140.0,
+      largeMobile: 150.0,
+      tablet: 160.0,
+      desktop: 170.0,
+    );
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Center(
-          child: SizedBox(
-            width: buttonWidth,
-            child: _buildAnimatedButton(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildAnimatedButton(
               context,
-              label: 'How to Play',
+              label: '',
               onPressed: () {
                 AudioService.instance.playClickSound();
                 _showHowToPlayModal(context);
@@ -430,32 +406,160 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               icon: Icons.help_outline,
             ),
-          ),
+            SizedBox(width: _getResponsiveValue(context,
+              smallMobile: 6.0,
+              mobile: 8.0,
+              largeMobile: 10.0,
+              tablet: 12.0,
+              desktop: 14.0,
+            )),
+            _buildSoundButton(context),
+          ],
         ),
-        SizedBox(height: buttonSpacing),
+        SizedBox(height: _getResponsiveValue(context,
+          smallMobile: 12.0,
+          mobile: 16.0,
+          largeMobile: 20.0,
+          tablet: 24.0,
+          desktop: 28.0,
+        )),
         Center(
-          child: SizedBox(
-            width: buttonWidth,
-            child: _buildAnimatedButton(
-              context,
-              label: 'Other Games',
-              onPressed: () {
-                AudioService.instance.playClickSound();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const OtherGamesPage(),
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+            ).createShader(bounds),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.white,
+                  size: _getResponsiveValue(context,
+                    smallMobile: 18.0,
+                    mobile: 20.0,
+                    largeMobile: 22.0,
+                    tablet: 24.0,
+                    desktop: 26.0,
                   ),
-                );
-              },
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
-              ),
-              icon: Icons.games,
+                ),
+                SizedBox(width: _getResponsiveValue(context,
+                  smallMobile: 6.0,
+                  mobile: 8.0,
+                  largeMobile: 10.0,
+                  tablet: 12.0,
+                  desktop: 14.0,
+                )),
+                Text(
+                  'Explore More Games',
+                  style: GoogleFonts.inter(
+                    fontSize: _getResponsiveValue(context,
+                      smallMobile: 16.0,
+                      mobile: 18.0,
+                      largeMobile: 20.0,
+                      tablet: 22.0,
+                      desktop: 24.0,
+                    ),
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 0.8,
+                    shadows: [
+                      Shadow(
+                        color: AppColors.logoGradientStart.withValues(alpha: 0.5),
+                        offset: const Offset(0, 2),
+                        blurRadius: 8,
+                      ),
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        offset: const Offset(0, 1),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
+        SizedBox(height: _getResponsiveValue(context,
+          smallMobile: 8.0,
+          mobile: 10.0,
+          largeMobile: 12.0,
+          tablet: 14.0,
+          desktop: 16.0,
+        )),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: gamesButtonWidth,
+              child: _buildGameButton(
+                context,
+                label: 'Mobile Games',
+                onPressed: () {
+                  AudioService.instance.playClickSound();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OtherGamesPage(),
+                    ),
+                  );
+                },
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF9F7AEA), Color(0xFF805AD5)],
+                ),
+                icon: Icons.smartphone_rounded,
+              ),
+            ),
+            SizedBox(width: buttonSpacing),
+            SizedBox(
+              width: gamesButtonWidth,
+              child: _buildGameButton(
+                context,
+                label: 'Web Games',
+                onPressed: () {
+                  AudioService.instance.playClickSound();
+                  _launchWebGamesUrl(context);
+                },
+                gradient: const LinearGradient(
+                  colors: [AppColors.info, AppColors.infoDark],
+                ),
+                icon: Icons.computer_rounded,
+              ),
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  Future<void> _launchWebGamesUrl(BuildContext context) async {
+    const String url = 'https://freegametoplay.com';
+    final Uri uri = Uri.parse(url);
+    
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open web games link'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening web games: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
 
@@ -467,12 +571,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     Gradient? gradient,
     required dynamic icon,
   }) {
-    return AnimatedBuilder(
-      animation: _cardsAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _cardsAnimation.value,
-          child: Container(
+    return Container(
             decoration: BoxDecoration(
               color: color,
               gradient: gradient,
@@ -562,34 +661,250 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           color: Colors.white,
                         ),
+                      if (label.isNotEmpty) ...[
+                        SizedBox(width: _getResponsiveValue(context,
+                          smallMobile: 6.0,
+                          mobile: 8.0,
+                          largeMobile: 10.0,
+                          tablet: 12.0,
+                          desktop: 14.0,
+                        )),
+                        Flexible(
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: _getResponsiveValue(context,
+                                smallMobile: 12.0,
+                                mobile: 14.0,
+                                largeMobile: 16.0,
+                                tablet: 18.0,
+                                desktop: 20.0,
+                              ),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(1, 1),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+  }
+
+  Widget _buildSoundButton(BuildContext context) {
+    return StreamBuilder<bool>(
+      stream: Stream.periodic(const Duration(milliseconds: 100))
+          .map((_) => AudioService.instance.isSoundEnabled),
+      builder: (context, snapshot) {
+        final isSoundEnabled = snapshot.data ?? AudioService.instance.isSoundEnabled;
+        return Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.neutral, AppColors.neutralDark],
+                  ),
+                  borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                    smallMobile: 8.0,
+                    mobile: 10.0,
+                    largeMobile: 12.0,
+                    tablet: 14.0,
+                    desktop: 16.0,
+                  )),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.neutral.withValues(alpha: 0.4),
+                      blurRadius: 15,
+                      offset: const Offset(0, 6),
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: AppColors.neutral.withValues(alpha: 0.2),
+                      blurRadius: 25,
+                      offset: const Offset(0, 10),
+                      spreadRadius: 4,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      AudioService.instance.playClickSound();
+                      AudioService.instance.toggleSound();
+                    },
+                    borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                      smallMobile: 8.0,
+                      mobile: 10.0,
+                      largeMobile: 12.0,
+                      tablet: 14.0,
+                      desktop: 16.0,
+                    )),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: _getResponsiveValue(context,
+                          smallMobile: 6.0,
+                          mobile: 8.0,
+                          largeMobile: 10.0,
+                          tablet: 12.0,
+                          desktop: 14.0,
+                        ),
+                        horizontal: _getResponsiveValue(context,
+                          smallMobile: 8.0,
+                          mobile: 10.0,
+                          largeMobile: 12.0,
+                          tablet: 14.0,
+                          desktop: 16.0,
+                        ),
+                      ),
+                      child: Icon(
+                        isSoundEnabled
+                            ? Icons.volume_up_rounded
+                            : Icons.volume_off_rounded,
+                        size: _getResponsiveValue(context,
+                          smallMobile: 16.0,
+                          mobile: 18.0,
+                          largeMobile: 20.0,
+                          tablet: 22.0,
+                          desktop: 24.0,
+                        ),
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+      },
+    );
+  }
+
+  Widget _buildGameButton(
+    BuildContext context, {
+    required String label,
+    required VoidCallback onPressed,
+    required Gradient gradient,
+    required IconData icon,
+  }) {
+    return Container(
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                smallMobile: 10.0,
+                mobile: 12.0,
+                largeMobile: 14.0,
+                tablet: 16.0,
+                desktop: 18.0,
+              )),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: gradient.colors.first.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 2,
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onPressed,
+                borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+                  smallMobile: 10.0,
+                  mobile: 12.0,
+                  largeMobile: 14.0,
+                  tablet: 16.0,
+                  desktop: 18.0,
+                )),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: _getResponsiveValue(context,
+                      smallMobile: 8.0,
+                      mobile: 10.0,
+                      largeMobile: 12.0,
+                      tablet: 14.0,
+                      desktop: 16.0,
+                    ),
+                    horizontal: _getResponsiveValue(context,
+                      smallMobile: 10.0,
+                      mobile: 12.0,
+                      largeMobile: 14.0,
+                      tablet: 16.0,
+                      desktop: 18.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        icon,
+                        size: _getResponsiveValue(context,
+                          smallMobile: 20.0,
+                          mobile: 22.0,
+                          largeMobile: 24.0,
+                          tablet: 26.0,
+                          desktop: 28.0,
+                        ),
+                        color: Colors.white,
+                      ),
                       SizedBox(width: _getResponsiveValue(context,
-                        smallMobile: 6.0,
-                        mobile: 8.0,
-                        largeMobile: 10.0,
-                        tablet: 12.0,
-                        desktop: 14.0,
+                        smallMobile: 4.0,
+                        mobile: 6.0,
+                        largeMobile: 8.0,
+                        tablet: 10.0,
+                        desktop: 12.0,
                       )),
                       Flexible(
                         child: Text(
                           label,
                           style: TextStyle(
                             fontSize: _getResponsiveValue(context,
-                              smallMobile: 12.0,
-                              mobile: 14.0,
-                              largeMobile: 16.0,
-                              tablet: 18.0,
-                              desktop: 20.0,
+                              smallMobile: 13.0,
+                              mobile: 15.0,
+                              largeMobile: 17.0,
+                              tablet: 19.0,
+                              desktop: 21.0,
                             ),
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            letterSpacing: 0.3,
                             shadows: [
                               Shadow(
-                                color: Colors.black26,
-                                offset: Offset(1, 1),
+                                color: Colors.black.withValues(alpha: 0.5),
+                                offset: const Offset(0, 1),
                                 blurRadius: 2,
                               ),
                             ],
                           ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -598,10 +913,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
   }
 
   Widget _buildLevelCard(BuildContext context, int level, int gridSize, int index) {
@@ -690,38 +1002,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 10.0,
     );
     
-    return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 800 + (index * 100)),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, value, child) {
-        return Transform.scale(
-          scale: 0.8 + (0.2 * value),
-          child: Transform.rotate(
-            angle: (1 - value) * 0.05,
-            child: _LevelCard(
-              level: level,
-              gridSize: gridSize,
-              difficulty: difficulty,
-              isUnlocked: isUnlocked,
-              isCompleted: isCompleted,
-              cardPadding: cardPadding,
-              iconSize: iconSize,
-              checkmarkSpacing: checkmarkSpacing,
-              checkmarkSize: checkmarkSize,
-              gridSpacing: gridSpacing,
-              gridPaddingH: gridPaddingH,
-              gridPaddingV: gridPaddingV,
-              gridFontSize: gridFontSize,
-              statusSpacing: statusSpacing,
-              statusFontSize: statusFontSize,
-              onTap: isUnlocked ? () {
-                AudioService.instance.playClickSound();
-                _startLevel(context, level);
-              } : null,
-            ),
-          ),
-        );
-      },
+    return _LevelCard(
+      level: level,
+      gridSize: gridSize,
+      difficulty: difficulty,
+      isUnlocked: isUnlocked,
+      isCompleted: isCompleted,
+      cardPadding: cardPadding,
+      iconSize: iconSize,
+      checkmarkSpacing: checkmarkSpacing,
+      checkmarkSize: checkmarkSize,
+      gridSpacing: gridSpacing,
+      gridPaddingH: gridPaddingH,
+      gridPaddingV: gridPaddingV,
+      gridFontSize: gridFontSize,
+      statusSpacing: statusSpacing,
+      statusFontSize: statusFontSize,
+      onTap: isUnlocked ? () {
+        AudioService.instance.playClickSound();
+        _startLevel(context, level);
+      } : null,
     );
   }
 

@@ -363,12 +363,12 @@ class _GamePageState extends State<GamePage> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.error, AppColors.errorDark],
+            colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: AppColors.error.withValues(alpha: 0.3),
+              color: AppColors.logoGradientStart.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

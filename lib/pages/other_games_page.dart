@@ -211,7 +211,7 @@ class _OtherGamesPageState extends State<OtherGamesPage>
           Expanded(
             child: Center(
               child: Text(
-                'Games by FGTP Labs',
+                'FGTP Labs',
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
@@ -239,12 +239,12 @@ class _OtherGamesPageState extends State<OtherGamesPage>
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.error, AppColors.errorDark],
+            colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: AppColors.error.withValues(alpha: 0.3),
+              color: AppColors.logoGradientStart.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -306,61 +306,50 @@ class _OtherGamesPageState extends State<OtherGamesPage>
       desktop: 0.75,
     );
 
-    return AnimatedBuilder(
-      animation: _cardsAnimation,
-      builder: (context, child) {
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: _getResponsiveValue(context,
-              smallMobile: 12.0,
-              mobile: 16.0,
-              largeMobile: 20.0,
-              tablet: 24.0,
-              desktop: 32.0,
-            ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: _getResponsiveValue(context,
+          smallMobile: 12.0,
+          mobile: 16.0,
+          largeMobile: 20.0,
+          tablet: 24.0,
+          desktop: 32.0,
+        ),
+      ),
+      child: GridView.builder(
+        padding: EdgeInsets.only(
+          top: _getResponsiveValue(context,
+            smallMobile: 4.0,
+            mobile: 6.0,
+            largeMobile: 8.0,
+            tablet: 10.0,
+            desktop: 12.0,
           ),
-          child: GridView.builder(
-            padding: EdgeInsets.only(
-              top: _getResponsiveValue(context,
-                smallMobile: 4.0,
-                mobile: 6.0,
-                largeMobile: 8.0,
-                tablet: 10.0,
-                desktop: 12.0,
-              ),
-              bottom: _getResponsiveValue(context,
-                smallMobile: 100.0,
-                mobile: 100.0,
-                largeMobile: 100.0,
-                tablet: 100.0,
-                desktop: 100.0,
-              ),
-            ),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: crossAxisSpacing,
-              mainAxisSpacing: mainAxisSpacing,
-              childAspectRatio: childAspectRatio,
-            ),
-            itemCount: _games.length,
-            itemBuilder: (context, index) {
-              final game = _games[index];
-              return Transform.scale(
-                scale: _cardsAnimation.value,
-                child: Transform.translate(
-                  offset: Offset(0, (1 - _cardsAnimation.value) * 50),
-                  child: _GameCard(
-                    game: game,
-                    index: index,
-                    onTap: () => _launchGameUrl(game),
-                    responsiveValue: _getResponsiveValue,
-                  ),
-                ),
-              );
-            },
+          bottom: _getResponsiveValue(context,
+            smallMobile: 100.0,
+            mobile: 100.0,
+            largeMobile: 100.0,
+            tablet: 100.0,
+            desktop: 100.0,
           ),
-        );
-      },
+        ),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: crossAxisSpacing,
+          mainAxisSpacing: mainAxisSpacing,
+          childAspectRatio: childAspectRatio,
+        ),
+        itemCount: _games.length,
+        itemBuilder: (context, index) {
+          final game = _games[index];
+          return _GameCard(
+            game: game,
+            index: index,
+            onTap: () => _launchGameUrl(game),
+            responsiveValue: _getResponsiveValue,
+          );
+        },
+      ),
     );
   }
 }
@@ -446,13 +435,7 @@ class _GameCardState extends State<_GameCard>
       desktop: 18.0,
     );
 
-    return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 800 + (widget.index * 100)),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, value, child) {
-        return Transform.scale(
-          scale: 0.8 + (0.2 * value),
-          child: GestureDetector(
+    return GestureDetector(
             onTap: widget.onTap,
             onTapDown: (_) => _hoverController.forward(),
             onTapUp: (_) => _hoverController.reverse(),
@@ -658,10 +641,7 @@ class _GameCardState extends State<_GameCard>
                 );
               },
             ),
-          ),
-        );
-      },
-    );
+          );
   }
 
   List<Color> _getCardGradient() {
