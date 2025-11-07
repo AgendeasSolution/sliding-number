@@ -21,10 +21,12 @@ class _OtherGamesPageState extends State<OtherGamesPage>
     with TickerProviderStateMixin {
   late AnimationController _cardsAnimationController;
   late AnimationController _particleAnimationController;
-  late Animation<double> _cardsAnimation;
   late Animation<double> _particleAnimation;
 
-  final List<GameModel> _games = GamesData.getOtherGames();
+  List<GameModel> _games = [];
+  bool _isLoading = true;
+  bool _hasError = false;
+  bool _isNetworkError = false;
 
   @override
   void initState() {
@@ -38,19 +40,47 @@ class _OtherGamesPageState extends State<OtherGamesPage>
       vsync: this,
     );
 
-    _cardsAnimation = CurvedAnimation(
-      parent: _cardsAnimationController,
-      curve: Curves.easeOutBack,
-    );
     _particleAnimation = CurvedAnimation(
       parent: _particleAnimationController,
       curve: Curves.linear,
     );
 
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _cardsAnimationController.forward();
-    });
+    _loadGames();
     _particleAnimationController.repeat();
+  }
+
+  Future<void> _loadGames() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _isNetworkError = false;
+    });
+
+    final result = await GamesData.getOtherGames();
+    
+    if (mounted) {
+      if (result.isSuccess) {
+        setState(() {
+          _games = result.games ?? [];
+          _isLoading = false;
+          _hasError = false;
+          _isNetworkError = false;
+        });
+
+        // Start card animation after games are loaded
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            _cardsAnimationController.forward();
+          }
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+          _isNetworkError = result.isNetworkError;
+        });
+      }
+    }
   }
 
   @override
@@ -107,16 +137,26 @@ class _OtherGamesPageState extends State<OtherGamesPage>
     final Uri uri = Uri.parse(url);
     
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      // For App Store URLs on iOS, try launching directly without canLaunchUrl check
+      // as it can be unreliable for App Store links
+      if (_isIOS() && url.contains('apps.apple.com')) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open store link'),
-              backgroundColor: AppColors.error,
-            ),
-          );
+        // For other URLs, check first then launch
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open store link'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -274,6 +314,62 @@ class _OtherGamesPageState extends State<OtherGamesPage>
   }
 
   Widget _buildGamesGrid(BuildContext context) {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primaryGold,
+        ),
+      );
+    }
+
+    if (_hasError || _games.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _isNetworkError ? Icons.wifi_off : Icons.error_outline,
+              color: AppColors.primaryGold,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _isNetworkError
+                  ? 'No Internet Connection'
+                  : _hasError
+                      ? 'Failed to load games'
+                      : 'No games available',
+              style: TextStyle(
+                color: AppColors.textWhite,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (_isNetworkError) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Please check your internet connection\nand try again',
+                style: TextStyle(
+                  color: AppColors.textWhite.withValues(alpha: 0.7),
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadGames,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGold,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
     final crossAxisCount = _getResponsiveValue(context,
       smallMobile: 2.0,
       mobile: 2.0,
@@ -344,7 +440,6 @@ class _OtherGamesPageState extends State<OtherGamesPage>
           final game = _games[index];
           return _GameCard(
             game: game,
-            index: index,
             onTap: () => _launchGameUrl(game),
             responsiveValue: _getResponsiveValue,
           );
@@ -356,7 +451,6 @@ class _OtherGamesPageState extends State<OtherGamesPage>
 
 class _GameCard extends StatefulWidget {
   final GameModel game;
-  final int index;
   final VoidCallback onTap;
   final double Function(BuildContext, {
     required double smallMobile,
@@ -368,7 +462,6 @@ class _GameCard extends StatefulWidget {
 
   const _GameCard({
     required this.game,
-    required this.index,
     required this.onTap,
     required this.responsiveValue,
   });
