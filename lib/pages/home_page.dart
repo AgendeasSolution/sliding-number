@@ -166,11 +166,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           )),
                           _buildHeader(context),
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 36.0,
-                            mobile: 42.0,
-                            largeMobile: 48.0,
-                            tablet: 54.0,
-                            desktop: 60.0,
+                            smallMobile: 16.0,
+                            mobile: 20.0,
+                            largeMobile: 24.0,
+                            tablet: 28.0,
+                            desktop: 32.0,
                           )),
                           Expanded(
                             child: Column(
@@ -262,7 +262,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: [
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+              colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
             ).createShader(bounds),
             child: Text(
               'Sliding Number',
@@ -273,7 +273,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 letterSpacing: letterSpacing,
                 shadows: [
                   Shadow(
-                    color: AppColors.logoGradientStart.withValues(alpha: 0.5),
+                    color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
                     offset: const Offset(0, 0),
                     blurRadius: _getResponsiveValue(context,
                       smallMobile: 15.0,
@@ -299,7 +299,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             width: lineWidth,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+                colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
               ),
               borderRadius: BorderRadius.circular(2),
             ),
@@ -426,7 +426,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         Center(
           child: ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+              colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
             ).createShader(bounds),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -465,7 +465,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     letterSpacing: 0.8,
                     shadows: [
                       Shadow(
-                        color: AppColors.logoGradientStart.withValues(alpha: 0.5),
+                        color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
                         offset: const Offset(0, 2),
                         blurRadius: 8,
                       ),
@@ -1313,15 +1313,8 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
   }
 
   List<Color> _getLevelGradient(int level) {
-    if (level <= 3) {
-      return [AppColors.success, AppColors.successDark];
-    } else if (level <= 6) {
-      return [AppColors.warning, AppColors.warningDark];
-    } else if (level <= 9) {
-      return [AppColors.info, AppColors.infoDark];
-    } else {
-      return [AppColors.error, AppColors.errorDark];
-    }
+    // Use golden gradient to match game board tiles
+    return [const Color(0xFFE9AF51), const Color(0xFFD4A046)];
   }
 
   List<Color> _getLockedGradient() {
@@ -1330,7 +1323,8 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   List<Color> _getCardGradient() {
     if (widget.isCompleted) {
-      return [AppColors.completed, AppColors.completedDark];
+      // Use same golden gradient as game tiles for consistency
+      return [const Color(0xFFE9AF51), const Color(0xFFD4A046)];
     } else if (widget.isUnlocked) {
       return _getLevelGradient(widget.level);
     } else {
@@ -1353,75 +1347,54 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
       return [
         // Main glow shadow with reduced intensity
         BoxShadow(
-          color: AppColors.completed.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 15 + (_hoverAnimation.value * 5),
-          offset: const Offset(0, 6),
-          spreadRadius: 2 + (_hoverAnimation.value * 1),
+          color: AppColors.completed.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 8 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 3),
+          spreadRadius: 1 + (_hoverAnimation.value * 0.5),
         ),
         // Gold accent glow with reduced intensity
         BoxShadow(
-          color: AppColors.completedAccent.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 20 + (_hoverAnimation.value * 8),
-          offset: const Offset(0, 9),
-          spreadRadius: 3 + (_hoverAnimation.value * 1),
+          color: AppColors.completedAccent.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.03)),
+          blurRadius: 10 + (_hoverAnimation.value * 3),
+          offset: const Offset(0, 4),
+          spreadRadius: 1.5 + (_hoverAnimation.value * 0.5),
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 12 + (_hoverAnimation.value * 3),
-          offset: const Offset(0, 4),
-        ),
-        // Inner glow effect with reduced intensity
-        BoxShadow(
-          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 8 + (_hoverAnimation.value * 2),
-          offset: const Offset(0, -2),
-          spreadRadius: -2,
+          color: Colors.black.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.03)),
+          blurRadius: 6 + (_hoverAnimation.value * 1.5),
+          offset: const Offset(0, 2),
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
         // Main glow shadow with hover enhancement
         BoxShadow(
-          color: _getLevelGradient(widget.level).first.withValues(alpha: 0.6 + (_hoverAnimation.value * 0.2)),
-          blurRadius: 25 + (_hoverAnimation.value * 10),
-          offset: const Offset(0, 10),
-          spreadRadius: 4 + (_hoverAnimation.value * 2),
-        ),
-        // Secondary glow
-        BoxShadow(
-          color: _getLevelGradient(widget.level).first.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 35 + (_hoverAnimation.value * 15),
-          offset: const Offset(0, 15),
-          spreadRadius: 6 + (_hoverAnimation.value * 3),
+          color: _getLevelGradient(widget.level).first.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
+          blurRadius: 12 + (_hoverAnimation.value * 4),
+          offset: const Offset(0, 5),
+          spreadRadius: 2 + (_hoverAnimation.value * 1),
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 20 + (_hoverAnimation.value * 5),
-          offset: const Offset(0, 8),
-        ),
-        // Inner glow effect
-        BoxShadow(
-          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 10 + (_hoverAnimation.value * 5),
-          offset: const Offset(0, -2),
-          spreadRadius: -2,
+          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 8 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 3),
         ),
       ];
     } else {
       return [
         // Locked state shadows
         BoxShadow(
-          color: Colors.grey.withValues(alpha: 0.4),
-          blurRadius: 15,
-          offset: const Offset(0, 5),
-          spreadRadius: 2,
+          color: Colors.grey.withValues(alpha: 0.2),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+          spreadRadius: 1,
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.3),
-          blurRadius: 10,
-          offset: const Offset(0, 3),
+          color: Colors.black.withValues(alpha: 0.15),
+          blurRadius: 5,
+          offset: const Offset(0, 1),
         ),
       ];
     }
@@ -1512,34 +1485,34 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
     if (widget.isCompleted) {
       return [
         BoxShadow(
-          color: AppColors.completedAccent.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 12 + (_hoverAnimation.value * 4),
-          offset: const Offset(0, 3),
+          color: AppColors.completedAccent.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 6 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 2),
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 8 + (_hoverAnimation.value * 4),
-          offset: const Offset(0, -2),
+          color: Colors.black.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, -1),
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
         BoxShadow(
-          color: Colors.white.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 8 + (_hoverAnimation.value * 4),
-          offset: const Offset(0, 2),
+          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 1),
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 8 + (_hoverAnimation.value * 4),
-          offset: const Offset(0, -2),
+          color: Colors.black.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, -1),
         ),
       ];
     } else {
       return [
         BoxShadow(
-          color: Colors.grey.withValues(alpha: 0.1),
-          blurRadius: 4,
+          color: Colors.grey.withValues(alpha: 0.05),
+          blurRadius: 2,
           offset: const Offset(0, 1),
         ),
       ];

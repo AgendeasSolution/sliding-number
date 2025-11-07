@@ -170,6 +170,64 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  void _showExitConfirmation() {
+    _showModalDialog(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Column(
+              children: [
+                const Text(
+                  'Are you sure you want to exit?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ModalFooter(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: GameButton(
+                    label: 'Cancel',
+                    onPressed: () {
+                      AudioService.instance.playClickSound();
+                      Navigator.of(context).pop();
+                    },
+                    gradient: const LinearGradient(
+                      colors: [AppColors.neutral, AppColors.neutralDark],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GameButton(
+                    label: 'Exit',
+                    onPressed: () {
+                      AudioService.instance.playClickSound();
+                      Navigator.of(context).pop();
+                      _exitGame();
+                    },
+                    gradient: const LinearGradient(
+                      colors: [AppColors.warning, AppColors.warningDark],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _exitGame() async {
     // Show interstitial ad for exit - only if already loaded (no waiting)
     final adShown = await InterstitialAdService.instance.showAdForExit(
@@ -307,35 +365,43 @@ class _GamePageState extends State<GamePage> {
       );
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: AppTheme.backgroundGradient,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header positioned at the top
-              _buildHeader(),
-              // Game board and bottom bar in same section
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GameBoard(
-                        gameState: _gameState!,
-                        onTileTap: _moveTile,
-                        onVerticalDragEnd: _onVerticalDragEnd,
-                        onHorizontalDragEnd: _onHorizontalDragEnd,
-                      ),
-                      const SizedBox(height: 20), // 20px gap between game board and bottom bar
-                      _buildBottomBar(),
-                    ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          _showExitConfirmation();
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: AppTheme.backgroundGradient,
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header positioned at the top
+                _buildHeader(),
+                // Game board and bottom bar in same section
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GameBoard(
+                          gameState: _gameState!,
+                          onTileTap: _moveTile,
+                          onVerticalDragEnd: _onVerticalDragEnd,
+                          onHorizontalDragEnd: _onHorizontalDragEnd,
+                        ),
+                        const SizedBox(height: 20), // 20px gap between game board and bottom bar
+                        _buildBottomBar(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              // Ad banner at the bottom - independent from other elements
-              const AdBanner(),
-            ],
+                // Ad banner at the bottom - independent from other elements
+                const AdBanner(),
+              ],
+            ),
           ),
         ),
       ),
@@ -377,7 +443,7 @@ class _GamePageState extends State<GamePage> {
         child: ElevatedButton(
           onPressed: () {
             AudioService.instance.playClickSound();
-            _exitGame();
+            _showExitConfirmation();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
