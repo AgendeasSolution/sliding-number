@@ -218,8 +218,6 @@ class _AdBannerState extends State<AdBanner> {
       margin: const EdgeInsets.only(
         left: 8.0,
         right: 8.0,
-        top: 4.0,
-        bottom: 16.0, // Added extra bottom margin for better spacing
       ),
       decoration: BoxDecoration(
         color: Colors.transparent,

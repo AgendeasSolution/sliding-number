@@ -15,6 +15,7 @@ import '../widgets/sound_toggle_button.dart';
 import '../services/level_progression_service.dart';
 import '../services/audio_service.dart';
 import 'game_page.dart';
+import 'other_games_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -403,22 +404,57 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 180.0,
     );
     
-    return Center(
-      child: SizedBox(
-        width: buttonWidth,
-        child: _buildAnimatedButton(
-          context,
-          label: 'How to Play',
-          onPressed: () {
-            AudioService.instance.playClickSound();
-            _showHowToPlayModal(context);
-          },
-          gradient: const LinearGradient(
-            colors: [AppColors.neutral, AppColors.neutralDark],
+    final buttonSpacing = _getResponsiveValue(context,
+      smallMobile: 12.0,
+      mobile: 16.0,
+      largeMobile: 20.0,
+      tablet: 24.0,
+      desktop: 28.0,
+    );
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: SizedBox(
+            width: buttonWidth,
+            child: _buildAnimatedButton(
+              context,
+              label: 'How to Play',
+              onPressed: () {
+                AudioService.instance.playClickSound();
+                _showHowToPlayModal(context);
+              },
+              gradient: const LinearGradient(
+                colors: [AppColors.neutral, AppColors.neutralDark],
+              ),
+              icon: Icons.help_outline,
+            ),
           ),
-          icon: Icons.help_outline,
         ),
-      ),
+        SizedBox(height: buttonSpacing),
+        Center(
+          child: SizedBox(
+            width: buttonWidth,
+            child: _buildAnimatedButton(
+              context,
+              label: 'Other Games',
+              onPressed: () {
+                AudioService.instance.playClickSound();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const OtherGamesPage(),
+                  ),
+                );
+              },
+              gradient: const LinearGradient(
+                colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
+              ),
+              icon: Icons.games,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
