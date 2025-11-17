@@ -135,15 +135,13 @@ class _AdBannerState extends State<AdBanner> {
           },
           onAdFailedToLoad: (ad, error) {
             if (mounted) {
-              // Handle different error types
-              if (error.code == 3) {
-                // Don't retry for "No Fill" - there are simply no ads available
-              } else if (error.code == 0) {
-                // Internal error - check ad unit ID and configuration
-              } else if (error.code == 1) {
-                // Invalid request - check ad unit ID format
-              }
-
+              // Handle different error types gracefully
+              // Error codes are AdMob-specific, but error handling works for all providers
+              // Error code 3 = No Fill (no ads available) - common across all ad networks
+              // Error code 0 = Internal error - network/provider issue
+              // Error code 1 = Invalid request - configuration issue
+              
+              // Universal error handling - works with any ad provider
               setState(() {
                 _isAdLoaded = false;
                 _isAdLoading = false;
@@ -151,7 +149,9 @@ class _AdBannerState extends State<AdBanner> {
               });
               ad.dispose();
               
-              // Only retry for errors other than "No Fill"
+              // Retry logic works for all ad providers
+              // Only retry for errors other than "No Fill" (code 3)
+              // "No Fill" means no ads available from any provider
               if (error.code != 3) {
                 _scheduleRetry();
               }
@@ -164,6 +164,8 @@ class _AdBannerState extends State<AdBanner> {
 
       _bannerAd!.load();
     } catch (e) {
+      // Catch any exceptions during ad loading
+      // Universal error handling - works with any ad provider
       if (mounted) {
         setState(() {
           _isAdLoaded = false;

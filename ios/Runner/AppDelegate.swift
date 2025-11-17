@@ -14,6 +14,25 @@ import FBSDKCoreKit
       didFinishLaunchingWithOptions: launchOptions
     )
     
+    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+    let appInfoChannel = FlutterMethodChannel(name: "com.fgtp.sliding_tile/app_info",
+                                              binaryMessenger: controller.binaryMessenger)
+    
+    appInfoChannel.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      if call.method == "getVersion" {
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+          result(version)
+        } else {
+          result(FlutterError(code: "UNAVAILABLE",
+                              message: "Version not available.",
+                              details: nil))
+        }
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    })
+    
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

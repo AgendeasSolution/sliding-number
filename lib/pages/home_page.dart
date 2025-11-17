@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +16,8 @@ import '../widgets/ad_banner.dart';
 import '../widgets/sound_toggle_button.dart';
 import '../services/level_progression_service.dart';
 import '../services/audio_service.dart';
+import '../services/app_update_service.dart';
+import '../widgets/update_dialog.dart';
 import 'game_page.dart';
 import 'other_games_page.dart';
 
@@ -60,12 +63,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
     _particleAnimationController.repeat();
     
-    // Initialize audio service
-    AudioService.instance.initialize();
+    // Defer heavy operations to prevent blocking UI rendering
+    // Use microtask to ensure UI is rendered first, then run background tasks
+    Future.microtask(() async {
+      if (!mounted) return;
+      
+      try {
+        // Initialize audio service (non-blocking, fire-and-forget)
+        AudioService.instance.initialize();
+        
+        // Load unlocked levels (async, won't block UI)
+        _loadUnlockedLevels();
+      } catch (e) {
+        // Silent error - use defaults if loading fails
+        if (mounted) {
+          setState(() {
+            _unlockedLevels = [1];
+            _completedLevels = [];
+          });
+        }
+      }
+    });
     
-    
-    // Load unlocked levels
-    _loadUnlockedLevels();
+    // Check for app updates after UI is fully loaded and responsive
+    // Longer delay ensures UI is interactive before network call
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _checkForUpdates();
+      }
+    });
   }
 
   @override
@@ -76,13 +102,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _loadUnlockedLevels() async {
-    final unlockedLevels = await LevelProgressionService.getUnlockedLevels();
-    final completedLevels = await LevelProgressionService.getCompletedLevels();
-    if (mounted) {
-      setState(() {
-        _unlockedLevels = unlockedLevels;
-        _completedLevels = completedLevels;
-      });
+    try {
+      final unlockedLevels = await LevelProgressionService.getUnlockedLevels()
+          .timeout(const Duration(seconds: 3), onTimeout: () => [1]);
+      final completedLevels = await LevelProgressionService.getCompletedLevels()
+          .timeout(const Duration(seconds: 3), onTimeout: () => <int>[]);
+      
+      if (mounted) {
+        setState(() {
+          _unlockedLevels = unlockedLevels;
+          _completedLevels = completedLevels;
+        });
+      }
+    } catch (e) {
+      // Silent error - use defaults to prevent crash
+      if (mounted) {
+        setState(() {
+          _unlockedLevels = [1];
+          _completedLevels = [];
+        });
+      }
+    }
+  }
+
+  Future<void> _checkForUpdates() async {
+    if (!mounted) return;
+    
+    try {
+      // Use timeout to prevent ANR - never wait more than 8 seconds
+      final isUpdateAvailable = await AppUpdateService.instance.isUpdateAvailable()
+          .timeout(
+            const Duration(seconds: 8),
+            onTimeout: () => false,
+          );
+      
+      if (isUpdateAvailable && mounted) {
+        // Show update dialog only if still mounted
+        if (mounted && context.mounted) {
+          UpdateDialog.show(context);
+        }
+      }
+    } catch (e) {
+      // Silent error handling - never interrupt user experience
+      // Don't even log in production to avoid any overhead
     }
   }
 
@@ -454,11 +516,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   'Explore More Games',
                   style: GoogleFonts.inter(
                     fontSize: _getResponsiveValue(context,
-                      smallMobile: 16.0,
-                      mobile: 18.0,
-                      largeMobile: 20.0,
-                      tablet: 22.0,
-                      desktop: 24.0,
+                      smallMobile: 12.0,
+                      mobile: 14.0,
+                      largeMobile: 16.0,
+                      tablet: 18.0,
+                      desktop: 20.0,
                     ),
                     fontWeight: FontWeight.w800,
                     color: Colors.white,

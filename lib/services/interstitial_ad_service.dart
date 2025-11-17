@@ -68,19 +68,32 @@ class InterstitialAdService {
                 _disposeAd();
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
+                // Handle ad show failure gracefully
+                // This can happen with any ad provider (AdMob, Facebook, Unity, etc.)
+                _onAdDismissedCallback?.call(); // Still call callback to continue app flow
+                _onAdDismissedCallback = null;
                 _disposeAd();
               },
             );
           },
           onAdFailedToLoad: (error) {
+            // Handle ad load failure gracefully
+            // Works with any ad provider - errors are handled silently
             _isLoading = false;
             _isAdReady = false;
+            // Note: Error codes are AdMob-specific, but failure handling is universal
+            // Error code 3 = No Fill (no ads available) - common across all providers
+            // Error code 0 = Internal error
+            // Error code 1 = Invalid request
           },
         ),
       );
     } catch (e) {
+      // Catch any exceptions during ad loading
+      // This handles errors from any ad provider gracefully
       _isLoading = false;
       _isAdReady = false;
+      // Silent error - app continues normally even if ads fail
     }
   }
 
@@ -97,8 +110,10 @@ class InterstitialAdService {
       await _interstitialAd!.show();
       return true;
     } catch (e) {
+      // Handle any exceptions during ad showing
+      // Works with all ad providers - errors are caught and handled
       _disposeAd();
-      return false;
+      return false; // Return false so app continues normally
     }
   }
 

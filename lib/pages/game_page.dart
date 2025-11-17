@@ -50,7 +50,8 @@ class _GamePageState extends State<GamePage> {
       // Start the game immediately without showing start modal
       _initGame();
       
-      // Show interstitial ad with 50% probability when entering game screen
+      // Show interstitial ad with 75% probability when entering game screen
+      // Call asynchronously so it doesn't block game initialization
       _showEntryAd();
     }
   }
@@ -62,7 +63,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _initGame() {
-    if (_gameState != null) {
+    if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
         _startGame();
@@ -71,7 +72,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _startGame() {
-    if (_gameState != null && !_gameState!.isGameActive) {
+    if (mounted && _gameState != null && !_gameState!.isGameActive) {
       setState(() {
         _gameState = GameService.startGame(_gameState!);
       });
@@ -82,10 +83,12 @@ class _GamePageState extends State<GamePage> {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_gameState != null && _gameState!.isGameActive && !_gameState!.isWin) {
+      if (mounted && _gameState != null && _gameState!.isGameActive && !_gameState!.isWin) {
         setState(() {
           _gameState = GameService.updateTimer(_gameState!);
         });
+      } else {
+        timer.cancel();
       }
     });
   }
@@ -113,7 +116,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _performReset() {
-    if (_gameState != null) {
+    if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.resetToInitial(_gameState!);
         _startGame();
@@ -121,9 +124,26 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _showEntryAd() {
-    // Show interstitial ad with 50% probability when entering game screen
-    InterstitialAdService.instance.showAdWithProbability(
+  Future<void> _showEntryAd() async {
+    // Show interstitial ad with 75% probability when entering game screen
+    // First ensure ad is loaded
+    final service = InterstitialAdService.instance;
+    
+    // If ad is not ready, try to load it and wait a bit
+    if (!service.isAdReady) {
+      await service.preloadAd();
+      
+      // Wait for ad to load (max 1.5 seconds)
+      int attempts = 0;
+      while (!service.isAdReady && attempts < 5) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        attempts++;
+      }
+    }
+    
+    // Now try to show ad with 75% probability
+    await service.showAdWithCustomProbability(
+      0.75,
       onAdDismissed: () {
         // Ad was shown and dismissed - no additional action needed
       },
@@ -163,10 +183,12 @@ class _GamePageState extends State<GamePage> {
   Future<void> _playAgain() async {
     if (_gameState != null) {
       final newGameState = await GameService.playAgain(_gameState!);
-      setState(() {
-        _gameState = newGameState;
-        _initGame();
-      });
+      if (mounted) {
+        setState(() {
+          _gameState = newGameState;
+          _initGame();
+        });
+      }
     }
   }
 
@@ -249,7 +271,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _moveTile(int row, int col) {
-    if (_gameState != null) {
+    if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.moveTile(_gameState!, row, col);
         if (_gameState!.isWin) {
@@ -299,17 +321,20 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _performShuffle() {
-    if (_gameState != null) {
+    if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
         _startGame();
       });
       // Show feedback that user earned the shuffle reward
-      _showShuffleRewardFeedback();
+      if (mounted) {
+        _showShuffleRewardFeedback();
+      }
     }
   }
 
   void _showShuffleRewardFeedback() {
+    if (!mounted) return;
     // Show a brief snackbar to confirm the reward was earned
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

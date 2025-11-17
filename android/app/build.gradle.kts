@@ -37,7 +37,20 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // ProGuard/R8 disabled - no code shrinking (larger app size but simpler build)
+            // If you enable minification, you MUST keep proguard-rules.pro file
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // Disable native library stripping to avoid build errors
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
         }
+    }
+    
+    // Suppress Java 8 obsolete warnings from dependencies
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("-Xlint:-options")
     }
 }
 
@@ -54,6 +67,8 @@ dependencies {
     // AdMob SDK and Adapters
     // Note: All adapters must be compatible with Google Mobile Ads SDK used by google_mobile_ads 6.0.0
     implementation("com.facebook.android:facebook-android-sdk:[8,9)")
+    // Add infer-annotation for Facebook SDK (required for R8/ProGuard)
+    implementation("com.facebook.infer.annotation:infer-annotation:0.18.0")
     implementation("com.google.ads.mediation:facebook:6.16.0.0")
     
     // AppLovin SDK and Adapter
