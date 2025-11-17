@@ -20,6 +20,55 @@ PODS:
     - Google-Mobile-Ads-SDK (~> 12.2.0)
     - webview_flutter_wkwebview
   - GoogleUserMessagingPlatform (3.1.0)
+  - onesignal_flutter (5.3.4):
+    - Flutter
+    - OneSignalXCFramework (= 5.2.14)
+  - OneSignalXCFramework (5.2.14):
+    - OneSignalXCFramework/OneSignalComplete (= 5.2.14)
+  - OneSignalXCFramework/OneSignal (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalExtension
+    - OneSignalXCFramework/OneSignalLiveActivities
+    - OneSignalXCFramework/OneSignalNotifications
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalOutcomes
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalComplete (5.2.14):
+    - OneSignalXCFramework/OneSignal
+    - OneSignalXCFramework/OneSignalInAppMessages
+    - OneSignalXCFramework/OneSignalLocation
+  - OneSignalXCFramework/OneSignalCore (5.2.14)
+  - OneSignalXCFramework/OneSignalExtension (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOutcomes
+  - OneSignalXCFramework/OneSignalInAppMessages (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalNotifications
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalOutcomes
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalLiveActivities (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalLocation (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalNotifications
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalNotifications (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalExtension
+    - OneSignalXCFramework/OneSignalOutcomes
+  - OneSignalXCFramework/OneSignalOSCore (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+  - OneSignalXCFramework/OneSignalOutcomes (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+  - OneSignalXCFramework/OneSignalUser (5.2.14):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalNotifications
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalOutcomes
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -39,6 +88,7 @@ DEPENDENCIES:
   - FBSDKShareKit
   - Flutter (from `Flutter`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
+  - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -53,6 +103,7 @@ SPEC REPOS:
     - FBSDKShareKit
     - Google-Mobile-Ads-SDK
     - GoogleUserMessagingPlatform
+    - OneSignalXCFramework
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
@@ -61,6 +112,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   google_mobile_ads:
     :path: ".symlinks/plugins/google_mobile_ads/ios"
+  onesignal_flutter:
+    :path: ".symlinks/plugins/onesignal_flutter/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   shared_preferences_foundation:
@@ -81,11 +134,13 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
   google_mobile_ads: cab27248050510554aa646195eacc393ce7406ad
   GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
+  onesignal_flutter: f69ff09eeaf41cea4b7a841de5a61e79e7fd9a5a
+  OneSignalXCFramework: 7112f3e89563e41ebc23fe807788f11985ac541c
   path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
-PODFILE CHECKSUM: 6f50b9a9868fecdefddedfddef51206cfbba4d44
+PODFILE CHECKSUM: c2df5dd6ed063bc30062c873c5ae7cedba148ba8
 
 COCOAPODS: 1.16.2

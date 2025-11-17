@@ -1,7 +1,6 @@
 import Flutter
 import UIKit
 import FBSDKCoreKit
-import FirebaseCore
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,9 +8,6 @@ import FirebaseCore
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Initialize Firebase
-    FirebaseApp.configure()
-    
     // Initialize Facebook SDK
     ApplicationDelegate.shared.application(
       application,

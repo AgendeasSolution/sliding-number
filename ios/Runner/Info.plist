@@ -70,5 +70,11 @@
 		<string>itms-apps</string>
 		<string>itms</string>
 	</array>
+	<key>OneSignal_AppID</key>
+	<string>ca8a28cf-d411-49b6-8d9b-0437b2612312</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

@@ -4,6 +4,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'pages/splash_page.dart';
 import 'theme/app_theme.dart';
 import 'services/audio_service.dart';
+import 'services/onesignal_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,13 @@ void main() async {
     await AudioService.instance.initialize();
   } catch (e) {
     // Continue running the app even if audio fails to initialize
+  }
+  
+  // Initialize OneSignal Push Notifications
+  try {
+    await OneSignalService.instance.initialize();
+  } catch (e) {
+    // Continue running the app even if OneSignal fails to initialize
   }
   
   // Set preferred orientations to portrait only
