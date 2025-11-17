@@ -338,11 +338,17 @@ class _GamePageState extends State<GamePage> {
     // Show a brief snackbar to confirm the reward was earned
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.shuffle, color: Colors.white),
-            SizedBox(width: 8),
-            Text('🎉 Shuffle reward earned! Board shuffled!'),
+            const Icon(Icons.shuffle, color: Colors.white),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '🎉 Shuffle reward earned! Board shuffled!',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         backgroundColor: AppColors.success,
