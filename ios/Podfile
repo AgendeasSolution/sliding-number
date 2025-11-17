@@ -30,10 +30,27 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
-  # Facebook SDK
+  # Facebook SDK (for login/sharing)
   pod 'FBSDKCoreKit'
   pod 'FBSDKLoginKit'
   pod 'FBSDKShareKit'
+
+  # AdMob Mediation Adapters
+  # IMPORTANT: Do NOT pin SDK versions (AppLovinSDK, UnityAds, Google-Mobile-Ads-SDK)
+  # Let the mediation adapters bring compatible SDK versions automatically
+  
+  # Meta (Facebook) Audience Network SDK and Adapter
+  pod 'FBAudienceNetwork', '6.21.0'
+  pod 'GoogleMobileAdsMediationFacebook', '6.21.0.0'
+  
+  # AppLovin Adapter (will bring AppLovinSDK automatically)
+  pod 'GoogleMobileAdsMediationAppLovin'
+  
+  # ironSource Adapter (will bring ironSource SDK automatically)
+  pod 'GoogleMobileAdsMediationIronSource'
+  
+  # Unity Ads Adapter (will bring UnityAds SDK automatically)
+  pod 'GoogleMobileAdsMediationUnity'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do

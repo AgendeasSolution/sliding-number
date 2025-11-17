@@ -54,6 +54,16 @@
         <meta-data
             android:name="onesignal_app_id"
             android:value="ca8a28cf-d411-49b6-8d9b-0437b2612312"/>
+        
+        <!-- AppLovin SDK Key (Configure in AdMob console, this is optional) -->
+        <!-- <meta-data
+            android:name="applovin.sdk.key"
+            android:value="YOUR_APPLOVIN_SDK_KEY"/> -->
+        
+        <!-- ironSource App Key (Configure in AdMob console, this is optional) -->
+        <!-- <meta-data
+            android:name="ironsource_app_key"
+            android:value="YOUR_IRONSOURCE_APP_KEY"/> -->
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

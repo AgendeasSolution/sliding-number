@@ -46,15 +46,26 @@ flutter {
 }
 
 dependencies {
+    
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
 
-    // Add the dependencies for any other desired Firebase products
-    // https://firebase.google.com/docs/android/setup#available-libraries
-
+    // AdMob SDK and Adapters
+    // Note: All adapters must be compatible with Google Mobile Ads SDK used by google_mobile_ads 6.0.0
     implementation("com.facebook.android:facebook-android-sdk:[8,9)")
+    implementation("com.google.ads.mediation:facebook:6.16.0.0")
+    
+    // AppLovin SDK and Adapter
+    // Using version range to find compatible version with SDK 12.2
+    implementation("com.applovin:applovin-sdk:12.4.2")
+    implementation("com.google.ads.mediation:applovin:+")
+    
+    // ironSource Adapter (SDK included automatically by adapter)
+    // Using version range to find compatible version
+    implementation("com.google.ads.mediation:ironsource:+")
+    
+    // Unity Ads SDK and Adapter
+    implementation("com.unity3d.ads:unity-ads:4.12.3")
+    implementation("com.google.ads.mediation:unity:+")
 }

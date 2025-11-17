@@ -4,8 +4,17 @@ plugins {
 
 allprojects {
     repositories {
+        // Google repository must be first for Google mediation adapters
         google()
         mavenCentral()
+        // AppLovin repository (for AppLovin SDK only)
+        // Using exclusiveContent to prevent Gradle from searching here for Google artifacts
+        maven {
+            url = uri("https://artifacts.applovin.com/android")
+            mavenContent {
+                includeGroup("com.applovin")
+            }
+        }
     }
 }
 

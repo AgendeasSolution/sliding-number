@@ -1,9 +1,11 @@
 PODS:
+  - AppLovinSDK (13.5.0)
   - audioplayers_darwin (0.0.1):
     - Flutter
     - FlutterMacOS
   - FBAEMKit (18.0.1):
     - FBSDKCoreKit_Basics (= 18.0.1)
+  - FBAudienceNetwork (6.21.0)
   - FBSDKCoreKit (18.0.1):
     - FBAEMKit (= 18.0.1)
     - FBSDKCoreKit_Basics (= 18.0.1)
@@ -19,7 +21,26 @@ PODS:
     - Flutter
     - Google-Mobile-Ads-SDK (~> 12.2.0)
     - webview_flutter_wkwebview
+  - GoogleMobileAdsMediationAppLovin (13.5.0.0):
+    - AppLovinSDK (= 13.5.0)
+    - Google-Mobile-Ads-SDK (~> 12.0)
+  - GoogleMobileAdsMediationFacebook (6.21.0.0):
+    - FBAudienceNetwork (= 6.21.0)
+    - Google-Mobile-Ads-SDK (~> 12.0)
+  - GoogleMobileAdsMediationIronSource (9.1.0.0.0):
+    - Google-Mobile-Ads-SDK (~> 12.0)
+    - IronSourceSDK (= 9.1.0.0)
+  - GoogleMobileAdsMediationUnity (4.16.3.0):
+    - Google-Mobile-Ads-SDK (~> 12.0)
+    - UnityAds (= 4.16.3)
   - GoogleUserMessagingPlatform (3.1.0)
+  - IronSourceAdQualitySDK (9.1.0)
+  - IronSourceSDK (9.1.0.0):
+    - IronSourceSDK/AdQuality (= 9.1.0.0)
+    - IronSourceSDK/Ads (= 9.1.0.0)
+  - IronSourceSDK/AdQuality (9.1.0.0):
+    - IronSourceAdQualitySDK (~> 9.1.0)
+  - IronSourceSDK/Ads (9.1.0.0)
   - onesignal_flutter (5.3.4):
     - Flutter
     - OneSignalXCFramework (= 5.2.14)
@@ -75,6 +96,7 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - UnityAds (4.16.3)
   - url_launcher_ios (0.0.1):
     - Flutter
   - webview_flutter_wkwebview (0.0.1):
@@ -83,11 +105,16 @@ PODS:
 
 DEPENDENCIES:
   - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/darwin`)
+  - FBAudienceNetwork (= 6.21.0)
   - FBSDKCoreKit
   - FBSDKLoginKit
   - FBSDKShareKit
   - Flutter (from `Flutter`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
+  - GoogleMobileAdsMediationAppLovin
+  - GoogleMobileAdsMediationFacebook (= 6.21.0.0)
+  - GoogleMobileAdsMediationIronSource
+  - GoogleMobileAdsMediationUnity
   - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -96,14 +123,23 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppLovinSDK
     - FBAEMKit
+    - FBAudienceNetwork
     - FBSDKCoreKit
     - FBSDKCoreKit_Basics
     - FBSDKLoginKit
     - FBSDKShareKit
     - Google-Mobile-Ads-SDK
+    - GoogleMobileAdsMediationAppLovin
+    - GoogleMobileAdsMediationFacebook
+    - GoogleMobileAdsMediationIronSource
+    - GoogleMobileAdsMediationUnity
     - GoogleUserMessagingPlatform
+    - IronSourceAdQualitySDK
+    - IronSourceSDK
     - OneSignalXCFramework
+    - UnityAds
 
 EXTERNAL SOURCES:
   audioplayers_darwin:
@@ -124,8 +160,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
+  AppLovinSDK: bf8974163120910e6b902e9610e7c5a2c0f577b6
   audioplayers_darwin: 4027b33a8f471d996c13f71cb77f0b1583b5d923
   FBAEMKit: b2ed182002dbcb65d5a60059c9693d322186cd00
+  FBAudienceNetwork: f4ab9e073ab98c884dbdb5ffe7c861272b380bc2
   FBSDKCoreKit: 7f96852f2539bdb88ba8d47e5ab4ae70a6f8d691
   FBSDKCoreKit_Basics: 22d4c1a509ded4e45116f3bb167a14907550f62e
   FBSDKLoginKit: f48c06446995cd209332831f692cea28b26e51da
@@ -133,14 +171,21 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
   google_mobile_ads: cab27248050510554aa646195eacc393ce7406ad
+  GoogleMobileAdsMediationAppLovin: 56b7465bf2afc594982b7820d8db8ea092a57ffc
+  GoogleMobileAdsMediationFacebook: 664fd50364d36531196bf24fe62d2db84cad72d0
+  GoogleMobileAdsMediationIronSource: e5e38b0f52019fcc82116f32df37868ce8dce43b
+  GoogleMobileAdsMediationUnity: 2861f3dc5abe7c13fafd11bd4484fbd5a762778c
   GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
+  IronSourceAdQualitySDK: 004e42fe12e9e95a0665eaf35ac852a73a757d10
+  IronSourceSDK: 42f7abe6ab74a76d27d9325718471ebe72dde3d2
   onesignal_flutter: f69ff09eeaf41cea4b7a841de5a61e79e7fd9a5a
   OneSignalXCFramework: 7112f3e89563e41ebc23fe807788f11985ac541c
   path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
+  UnityAds: 64164885dd38214bfc556eb074ab1995cc613fbf
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
 
-PODFILE CHECKSUM: c2df5dd6ed063bc30062c873c5ae7cedba148ba8
+PODFILE CHECKSUM: fb64049fb7e55c7e71ed1bc002fcc1b482e606a7
 
 COCOAPODS: 1.16.2
