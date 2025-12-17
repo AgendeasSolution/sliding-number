@@ -251,6 +251,42 @@ class GameService {
     );
   }
 
+  /// Swaps two tiles horizontally (same row, different columns)
+  static GameState swapTiles(GameState currentState, int row1, int col1, int row2, int col2) {
+    if (!currentState.isGameActive) return currentState;
+    
+    // Validate positions
+    if (row1 < 0 || row1 >= currentState.rows || 
+        row2 < 0 || row2 >= currentState.rows ||
+        col1 < 0 || col1 >= currentState.columns ||
+        col2 < 0 || col2 >= currentState.columns) {
+      return currentState;
+    }
+    
+    // Must be in the same row
+    if (row1 != row2) {
+      return currentState;
+    }
+    
+    final newBoard = List<int>.from(currentState.board);
+    final index1 = row1 * currentState.columns + col1;
+    final index2 = row2 * currentState.columns + col2;
+    
+    // Swap the tiles
+    final temp = newBoard[index1];
+    newBoard[index1] = newBoard[index2];
+    newBoard[index2] = temp;
+    
+    // Update empty tile position if it was involved in the swap
+    final newEmptyPos = _findEmptyPosition(newBoard, currentState.rows, currentState.columns);
+    
+    return currentState.copyWith(
+      board: newBoard,
+      emptyTilePos: newEmptyPos,
+      movesCount: currentState.movesCount + 1,
+    );
+  }
+
   static GameState resetToInitial(GameState currentState) {
     return currentState.copyWith(
       board: List.from(currentState.initialBoard),

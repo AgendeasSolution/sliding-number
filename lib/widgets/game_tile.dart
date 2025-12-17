@@ -10,6 +10,7 @@ class GameTile extends StatelessWidget {
   final int columns;
   final VoidCallback onTap;
   final bool isVisible;
+  final bool isHighlighted;
 
   const GameTile({
     super.key,
@@ -19,6 +20,7 @@ class GameTile extends StatelessWidget {
     required this.columns,
     required this.onTap,
     required this.isVisible,
+    this.isHighlighted = false,
   });
 
   @override
@@ -30,21 +32,42 @@ class GameTile extends StatelessWidget {
         opacity: isVisible ? 1.0 : 0.0,
         child: Container(
           decoration: BoxDecoration(
-            gradient: isVisible ? const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
-            ) : null,
-            border: isVisible ? null : Border.all(
-              color: AppColors.primaryGold.withValues(alpha: 0.3),
-              width: 2,
-            ),
+            gradient: isVisible 
+                ? (isHighlighted 
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.primaryGold,
+                          AppColors.primaryGoldDark,
+                        ],
+                      )
+                    : const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+                      ))
+                : null,
+            border: isVisible 
+                ? (isHighlighted 
+                    ? Border.all(
+                        color: AppColors.primaryGold,
+                        width: 3,
+                      )
+                    : null)
+                : Border.all(
+                    color: AppColors.primaryGold.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
             borderRadius: BorderRadius.circular(AppConstants.tileBorderRadius),
             boxShadow: isVisible ? [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 8,
+                color: isHighlighted 
+                    ? AppColors.primaryGold.withValues(alpha: 0.5)
+                    : Colors.black.withValues(alpha: 0.2),
+                blurRadius: isHighlighted ? 12 : 8,
                 offset: const Offset(0, 4),
+                spreadRadius: isHighlighted ? 2 : 0,
               ),
             ] : [],
           ),

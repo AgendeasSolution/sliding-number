@@ -8,6 +8,8 @@ class GameBoard extends StatelessWidget {
   final Function(int row, int col) onTileTap;
   final Function(DragEndDetails) onVerticalDragEnd;
   final Function(DragEndDetails) onHorizontalDragEnd;
+  final bool isSwapMode;
+  final String? swapDirection;
 
   const GameBoard({
     super.key,
@@ -15,6 +17,8 @@ class GameBoard extends StatelessWidget {
     required this.onTileTap,
     required this.onVerticalDragEnd,
     required this.onHorizontalDragEnd,
+    this.isSwapMode = false,
+    this.swapDirection,
   });
 
   @override
@@ -68,6 +72,19 @@ class GameBoard extends StatelessWidget {
                     final isVisible = tileValue != AppConstants.emptyTileValue;
                     final row = index ~/ gameState.columns;
                     final col = index % gameState.columns;
+                    
+                    // Determine if this tile should be highlighted
+                    bool isHighlighted = false;
+                    if (isSwapMode && isVisible && swapDirection != null) {
+                      // Highlight tiles that can be swapped
+                      if (swapDirection == 'left') {
+                        // For left swap, highlight tiles that have a tile to their left
+                        isHighlighted = col > 0;
+                      } else if (swapDirection == 'right') {
+                        // For right swap, highlight tiles that have a tile to their right
+                        isHighlighted = col < gameState.columns - 1;
+                      }
+                    }
 
                     return GameTile(
                       tileValue: tileValue,
@@ -75,6 +92,7 @@ class GameBoard extends StatelessWidget {
                       rows: gameState.rows,
                       columns: gameState.columns,
                       isVisible: isVisible,
+                      isHighlighted: isHighlighted,
                       onTap: () => onTileTap(row, col),
                     );
                   },

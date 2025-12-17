@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../constants/app_constants.dart';
 import '../models/game_state.dart';
 import '../services/game_service.dart';
 import '../services/interstitial_ad_service.dart';
@@ -29,6 +31,10 @@ class _GamePageState extends State<GamePage> {
   GameState? _gameState;
   Timer? _timer;
   bool _isInitializing = true;
+  bool _leftSwipeUsed = false;
+  bool _rightSwipeUsed = false;
+  bool _isLeftSwapMode = false;
+  bool _isRightSwapMode = false;
 
   @override
   void initState() {
@@ -66,6 +72,10 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
+        _leftSwipeUsed = false;
+        _rightSwipeUsed = false;
+        _isLeftSwapMode = false;
+        _isRightSwapMode = false;
         _startGame();
       });
     }
@@ -119,6 +129,10 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.resetToInitial(_gameState!);
+        _leftSwipeUsed = false;
+        _rightSwipeUsed = false;
+        _isLeftSwapMode = false;
+        _isRightSwapMode = false;
         _startGame();
       });
     }
@@ -174,6 +188,10 @@ class _GamePageState extends State<GamePage> {
       if (mounted) {
         setState(() {
           _gameState = newGameState;
+          _leftSwipeUsed = false;
+          _rightSwipeUsed = false;
+          _isLeftSwapMode = false;
+          _isRightSwapMode = false;
           _initGame();
         });
       }
@@ -186,6 +204,10 @@ class _GamePageState extends State<GamePage> {
       if (mounted) {
         setState(() {
           _gameState = newGameState;
+          _leftSwipeUsed = false;
+          _rightSwipeUsed = false;
+          _isLeftSwapMode = false;
+          _isRightSwapMode = false;
           _initGame();
         });
       }
@@ -272,6 +294,12 @@ class _GamePageState extends State<GamePage> {
 
   void _moveTile(int row, int col) {
     if (mounted && _gameState != null) {
+      // Check if we're in swap mode
+      if (_isLeftSwapMode || _isRightSwapMode) {
+        _performSwap(row, col);
+        return;
+      }
+      
       setState(() {
         _gameState = GameService.moveTile(_gameState!, row, col);
         if (_gameState!.isWin) {
@@ -282,6 +310,55 @@ class _GamePageState extends State<GamePage> {
         }
       });
     }
+  }
+
+  void _performSwap(int row, int col) {
+    if (_gameState == null) return;
+    
+    // Check if the clicked tile is empty
+    final tileIndex = row * _gameState!.columns + col;
+    if (_gameState!.board[tileIndex] == AppConstants.emptyTileValue) {
+      // Can't swap empty tile - exit swap mode
+      setState(() {
+        _isLeftSwapMode = false;
+        _isRightSwapMode = false;
+      });
+      return;
+    }
+    
+    final isLeftSwap = _isLeftSwapMode;
+    final targetCol = isLeftSwap ? col - 1 : col + 1;
+    
+    // Check if swap is valid (target column must be within bounds)
+    if (targetCol < 0 || targetCol >= _gameState!.columns) {
+      // Invalid swap - exit swap mode
+      setState(() {
+        _isLeftSwapMode = false;
+        _isRightSwapMode = false;
+      });
+      return;
+    }
+    
+    // Perform the swap
+    setState(() {
+      _gameState = GameService.swapTiles(_gameState!, row, col, row, targetCol);
+      _isLeftSwapMode = false;
+      _isRightSwapMode = false;
+      
+      // Mark the swap as used
+      if (isLeftSwap) {
+        _leftSwipeUsed = true;
+      } else {
+        _rightSwipeUsed = true;
+      }
+      
+      if (_gameState!.isWin) {
+        _handleWin();
+      } else {
+        // Play slide sound for successful swap
+        AudioService.instance.playSlideSound();
+      }
+    });
   }
 
   void _handleWin() {
@@ -324,6 +401,10 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
+        _leftSwipeUsed = false;
+        _rightSwipeUsed = false;
+        _isLeftSwapMode = false;
+        _isRightSwapMode = false;
         _startGame();
       });
       // Show feedback that user earned the shuffle reward
@@ -362,6 +443,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
+    // Don't allow drag gestures when in swap mode
+    if (_isLeftSwapMode || _isRightSwapMode) return;
+    
     if (_gameState != null) {
       if (details.primaryVelocity! > 0) { // Swiped Down
         _moveTile(_gameState!.emptyTilePos.x - 1, _gameState!.emptyTilePos.y);
@@ -372,11 +456,52 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
+    // Don't allow drag gestures when in swap mode
+    if (_isLeftSwapMode || _isRightSwapMode) return;
+    
     if (_gameState != null) {
       if (details.primaryVelocity! > 0) { // Swiped Right
         _moveTile(_gameState!.emptyTilePos.x, _gameState!.emptyTilePos.y - 1);
       } else if (details.primaryVelocity! < 0) { // Swiped Left
         _moveTile(_gameState!.emptyTilePos.x, _gameState!.emptyTilePos.y + 1);
+      }
+    }
+  }
+
+  void _onLeftSwipeButtonPressed() {
+    if (_gameState != null && _gameState!.isGameActive) {
+      if (_isLeftSwapMode) {
+        // Cancel swap mode if already active
+        setState(() {
+          _isLeftSwapMode = false;
+        });
+        AudioService.instance.playClickSound();
+      } else if (!_leftSwipeUsed) {
+        // Enter left swap selection mode
+        setState(() {
+          _isLeftSwapMode = true;
+          _isRightSwapMode = false; // Cancel right swap mode if active
+        });
+        AudioService.instance.playClickSound();
+      }
+    }
+  }
+
+  void _onRightSwipeButtonPressed() {
+    if (_gameState != null && _gameState!.isGameActive) {
+      if (_isRightSwapMode) {
+        // Cancel swap mode if already active
+        setState(() {
+          _isRightSwapMode = false;
+        });
+        AudioService.instance.playClickSound();
+      } else if (!_rightSwipeUsed) {
+        // Enter right swap selection mode
+        setState(() {
+          _isRightSwapMode = true;
+          _isLeftSwapMode = false; // Cancel left swap mode if active
+        });
+        AudioService.instance.playClickSound();
       }
     }
   }
@@ -417,11 +542,15 @@ class _GamePageState extends State<GamePage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        _buildSwipeButtons(),
+                        const SizedBox(height: 12), // Gap between buttons and game board
                         GameBoard(
                           gameState: _gameState!,
                           onTileTap: _moveTile,
                           onVerticalDragEnd: _onVerticalDragEnd,
                           onHorizontalDragEnd: _onHorizontalDragEnd,
+                          isSwapMode: _isLeftSwapMode || _isRightSwapMode,
+                          swapDirection: _isLeftSwapMode ? 'left' : (_isRightSwapMode ? 'right' : null),
                         ),
                         const SizedBox(height: 20), // 20px gap between game board and bottom bar
                         _buildBottomBar(),
@@ -540,6 +669,131 @@ class _GamePageState extends State<GamePage> {
             Icons.refresh,
             color: AppColors.textWhite,
             size: 18,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwipeButtons() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.gameBoardBackground, AppColors.tileBackgroundLight],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.gameBoardBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGold.withValues(alpha: 0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildSwipeButton(
+            icon: Icons.arrow_back,
+            label: _isLeftSwapMode ? 'Cancel' : 'Swipe Left',
+            onPressed: _onLeftSwipeButtonPressed,
+            isUsed: _leftSwipeUsed,
+            isEnabled: _gameState?.isGameActive ?? false,
+            isActive: _isLeftSwapMode,
+          ),
+          const SizedBox(width: 16),
+          _buildSwipeButton(
+            icon: Icons.arrow_forward,
+            label: _isRightSwapMode ? 'Cancel' : 'Swipe Right',
+            onPressed: _onRightSwipeButtonPressed,
+            isUsed: _rightSwipeUsed,
+            isEnabled: _gameState?.isGameActive ?? false,
+            isActive: _isRightSwapMode,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwipeButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required bool isUsed,
+    required bool isEnabled,
+    bool isActive = false,
+  }) {
+    final bool isDisabled = (isUsed && !isActive) || !isEnabled;
+    
+    return Expanded(
+      child: Opacity(
+        opacity: isDisabled ? 0.5 : 1.0,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: isDisabled
+                ? null
+                : (isActive
+                    ? LinearGradient(
+                        colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
+                      )
+                    : const LinearGradient(
+                        colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
+                      )),
+            color: isDisabled ? AppColors.neutralDark : null,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isDisabled
+                ? []
+                : [
+                    BoxShadow(
+                      color: (isActive ? AppColors.primaryGold : AppColors.logoGradientStart)
+                          .withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+          ),
+          child: ElevatedButton(
+            onPressed: isDisabled ? null : onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: AppColors.textWhite,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    isUsed ? 'Used' : label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textWhite,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
