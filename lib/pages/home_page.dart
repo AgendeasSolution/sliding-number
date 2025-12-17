@@ -34,6 +34,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _particleAnimationController;
   late Animation<double> _cardsAnimation;
   late Animation<double> _particleAnimation;
+  late PageController _pageController;
+  int _currentPageIndex = 0;
   
   List<int> _unlockedLevels = [1]; // Default to only level 1 unlocked
   List<int> _completedLevels = []; // Track completed levels
@@ -41,6 +43,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    final int totalPages = (AppConstants.maxLevel / 9).ceil();
+    _pageController = PageController();
     _cardsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -97,6 +101,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _pageController.dispose();
     _cardsAnimationController.dispose();
     _particleAnimationController.dispose();
     super.dispose();
@@ -221,11 +226,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 8.0,
-                            mobile: 12.0,
-                            largeMobile: 16.0,
-                            tablet: 20.0,
-                            desktop: 24.0,
+                            smallMobile: 20.0,
+                            mobile: 28.0,
+                            largeMobile: 36.0,
+                            tablet: 44.0,
+                            desktop: 52.0,
                           )),
                           _buildHeader(context),
                           SizedBox(height: _getResponsiveValue(context,
@@ -236,26 +241,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             desktop: 32.0,
                           )),
                           Expanded(
-                            child: Column(
-                              children: [
-                                Expanded(child: _buildLevelGrid(context)),
-                                SizedBox(height: _getResponsiveValue(context,
-                                  smallMobile: 12.0,
-                                  mobile: 16.0,
-                                  largeMobile: 20.0,
-                                  tablet: 24.0,
-                                  desktop: 28.0,
-                                )),
-                                _buildActionButtons(context),
-                              ],
-                            ),
+                            child: _buildLevelGrid(context),
                           ),
                         ],
                       ),
                     ),
+                    // Top corner buttons
+                    Positioned(
+                      top: _getResponsiveValue(context,
+                        smallMobile: 4.0,
+                        mobile: 6.0,
+                        largeMobile: 8.0,
+                        tablet: 10.0,
+                        desktop: 12.0,
+                      ),
+                      left: _getResponsiveValue(context,
+                        smallMobile: 12.0,
+                        mobile: 16.0,
+                        largeMobile: 20.0,
+                        tablet: 24.0,
+                        desktop: 28.0,
+                      ),
+                      child: _buildHowToPlayButton(context),
+                    ),
+                    Positioned(
+                      top: _getResponsiveValue(context,
+                        smallMobile: 4.0,
+                        mobile: 6.0,
+                        largeMobile: 8.0,
+                        tablet: 10.0,
+                        desktop: 12.0,
+                      ),
+                      right: _getResponsiveValue(context,
+                        smallMobile: 12.0,
+                        mobile: 16.0,
+                        largeMobile: 20.0,
+                        tablet: 24.0,
+                        desktop: 28.0,
+                      ),
+                      child: _buildSoundButton(context),
+                    ),
                   ],
                 ),
               ),
+              // Explore More Games section - positioned above ad banner
+              _buildExploreMoreSection(context),
               // Ad banner at the bottom - independent from other elements
               const AdBanner(),
             ],
@@ -375,14 +405,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 
   Widget _buildLevelGrid(BuildContext context) {
-    // Responsive grid configuration
-    final crossAxisCount = _getResponsiveValue(context,
-      smallMobile: 3.0,
-      mobile: 3.0,
-      largeMobile: 4.0,
-      tablet: 5.0,
-      desktop: 6.0,
-    ).toInt();
+    // Carousel with 3x3 grid per page
+    const int itemsPerPage = 9; // 3 rows × 3 columns
+    final int totalPages = (AppConstants.maxLevel / itemsPerPage).ceil();
     
     final crossAxisSpacing = _getResponsiveValue(context,
       smallMobile: 8.0,
@@ -408,33 +433,157 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 0.9,
     );
     
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: crossAxisSpacing,
-        mainAxisSpacing: mainAxisSpacing,
-        childAspectRatio: childAspectRatio,
-      ),
-      itemCount: AppConstants.maxLevel,
-      itemBuilder: (context, index) {
-        final level = index + 1;
-        final gridDimensions = GameUtils.calculateGridSize(level);
-        return _buildLevelCard(context, level, gridDimensions.rows, gridDimensions.columns, index);
-      },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate the height needed for 3 rows
+            final availableWidth = constraints.maxWidth - 16.0; // Account for padding
+            final itemWidth = (availableWidth - (crossAxisSpacing * 2)) / 3;
+            final itemHeight = itemWidth / childAspectRatio;
+            final gridHeight = (itemHeight * 3) + (mainAxisSpacing * 2);
+            
+            return SizedBox(
+              height: gridHeight,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPageIndex = index;
+                  });
+                },
+                itemCount: totalPages,
+                itemBuilder: (context, pageIndex) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, // Fixed 3 columns
+                        crossAxisSpacing: crossAxisSpacing,
+                        mainAxisSpacing: mainAxisSpacing,
+                        childAspectRatio: childAspectRatio,
+                      ),
+                      itemCount: itemsPerPage,
+                      itemBuilder: (context, gridIndex) {
+                        final levelIndex = (pageIndex * itemsPerPage) + gridIndex;
+                        if (levelIndex >= AppConstants.maxLevel) {
+                          // Empty slot for last page if not full
+                          return const SizedBox.shrink();
+                        }
+                        final level = levelIndex + 1;
+                        final gridDimensions = GameUtils.calculateGridSize(level);
+                        return _buildLevelCard(context, level, gridDimensions.rows, gridDimensions.columns, levelIndex);
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        // Page indicators with gap from carousel
+        if (totalPages > 1)
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              totalPages,
+              (index) => GestureDetector(
+                onTap: () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  width: 8.0,
+                  height: 8.0,
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentPageIndex == index
+                        ? AppColors.primaryGold
+                        : AppColors.primaryGold.withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          ),
+      ],
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    final buttonWidth = _getResponsiveValue(context,
-      smallMobile: 140.0,
-      mobile: 150.0,
-      largeMobile: 160.0,
-      tablet: 170.0,
-      desktop: 180.0,
+  Widget _buildHowToPlayButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        AudioService.instance.playClickSound();
+        _showHowToPlayModal(context);
+      },
+      child: Container(
+        width: _getResponsiveValue(context,
+          smallMobile: 36.0,
+          mobile: 40.0,
+          largeMobile: 44.0,
+          tablet: 48.0,
+          desktop: 52.0,
+        ),
+        height: _getResponsiveValue(context,
+          smallMobile: 36.0,
+          mobile: 40.0,
+          largeMobile: 44.0,
+          tablet: 48.0,
+          desktop: 52.0,
+        ),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.neutral, AppColors.neutralDark],
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.help_outline,
+          color: Colors.white,
+          size: _getResponsiveValue(context,
+            smallMobile: 20.0,
+            mobile: 22.0,
+            largeMobile: 24.0,
+            tablet: 26.0,
+            desktop: 28.0,
+          ),
+        ),
+      ),
     );
-    
+  }
+
+  Widget _buildSoundButton(BuildContext context) {
+    return SoundToggleButton(
+      size: _getResponsiveValue(context,
+        smallMobile: 36.0,
+        mobile: 40.0,
+        largeMobile: 44.0,
+        tablet: 48.0,
+        desktop: 52.0,
+      ),
+    );
+  }
+
+  Widget _buildExploreMoreSection(BuildContext context) {
     final buttonSpacing = _getResponsiveValue(context,
       smallMobile: 12.0,
       mobile: 16.0,
@@ -451,148 +600,134 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 170.0,
     );
     
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildAnimatedButton(
-              context,
-              label: '',
-              onPressed: () {
-                AudioService.instance.playClickSound();
-                _showHowToPlayModal(context);
-              },
-              gradient: const LinearGradient(
-                colors: [AppColors.neutral, AppColors.neutralDark],
-              ),
-              icon: Icons.help_outline,
-            ),
-            SizedBox(width: _getResponsiveValue(context,
-              smallMobile: 6.0,
-              mobile: 8.0,
-              largeMobile: 10.0,
-              tablet: 12.0,
-              desktop: 14.0,
-            )),
-            _buildSoundButton(context),
-          ],
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: _getResponsiveValue(context,
+          smallMobile: 16.0,
+          mobile: 20.0,
+          largeMobile: 24.0,
+          tablet: 28.0,
+          desktop: 32.0,
         ),
-        SizedBox(height: _getResponsiveValue(context,
+        vertical: _getResponsiveValue(context,
           smallMobile: 12.0,
           mobile: 16.0,
           largeMobile: 20.0,
           tablet: 24.0,
           desktop: 28.0,
-        )),
-        Center(
-          child: ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
-            ).createShader(bounds),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  color: Colors.white,
-                  size: _getResponsiveValue(context,
-                    smallMobile: 18.0,
-                    mobile: 20.0,
-                    largeMobile: 22.0,
-                    tablet: 24.0,
-                    desktop: 26.0,
-                  ),
-                ),
-                SizedBox(width: _getResponsiveValue(context,
-                  smallMobile: 6.0,
-                  mobile: 8.0,
-                  largeMobile: 10.0,
-                  tablet: 12.0,
-                  desktop: 14.0,
-                )),
-                Text(
-                  'Explore More Games',
-                  style: GoogleFonts.inter(
-                    fontSize: _getResponsiveValue(context,
-                      smallMobile: 12.0,
-                      mobile: 14.0,
-                      largeMobile: 16.0,
-                      tablet: 18.0,
-                      desktop: 20.0,
-                    ),
-                    fontWeight: FontWeight.w800,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+              ).createShader(bounds),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
                     color: Colors.white,
-                    letterSpacing: 0.8,
-                    shadows: [
-                      Shadow(
-                        color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                      ),
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        offset: const Offset(0, 1),
-                        blurRadius: 4,
-                      ),
-                    ],
+                    size: _getResponsiveValue(context,
+                      smallMobile: 18.0,
+                      mobile: 20.0,
+                      largeMobile: 22.0,
+                      tablet: 24.0,
+                      desktop: 26.0,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                  SizedBox(width: _getResponsiveValue(context,
+                    smallMobile: 6.0,
+                    mobile: 8.0,
+                    largeMobile: 10.0,
+                    tablet: 12.0,
+                    desktop: 14.0,
+                  )),
+                  Text(
+                    'Explore More Games',
+                    style: GoogleFonts.inter(
+                      fontSize: _getResponsiveValue(context,
+                        smallMobile: 12.0,
+                        mobile: 14.0,
+                        largeMobile: 16.0,
+                        tablet: 18.0,
+                        desktop: 20.0,
+                      ),
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.8,
+                      shadows: [
+                        Shadow(
+                          color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
+                          offset: const Offset(0, 2),
+                          blurRadius: 8,
+                        ),
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(0, 1),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        SizedBox(height: _getResponsiveValue(context,
-          smallMobile: 8.0,
-          mobile: 10.0,
-          largeMobile: 12.0,
-          tablet: 14.0,
-          desktop: 16.0,
-        )),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: gamesButtonWidth,
-              child: _buildGameButton(
-                context,
-                label: 'Mobile Games',
-                onPressed: () {
-                  AudioService.instance.playClickSound();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const OtherGamesPage(),
-                    ),
-                  );
-                },
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF9F7AEA), Color(0xFF805AD5)],
+          SizedBox(height: _getResponsiveValue(context,
+            smallMobile: 8.0,
+            mobile: 10.0,
+            largeMobile: 12.0,
+            tablet: 14.0,
+            desktop: 16.0,
+          )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: gamesButtonWidth,
+                child: _buildGameButton(
+                  context,
+                  label: 'Mobile Games',
+                  onPressed: () {
+                    AudioService.instance.playClickSound();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const OtherGamesPage(),
+                      ),
+                    );
+                  },
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF9F7AEA), Color(0xFF805AD5)],
+                  ),
+                  icon: Icons.smartphone_rounded,
                 ),
-                icon: Icons.smartphone_rounded,
               ),
-            ),
-            SizedBox(width: buttonSpacing),
-            SizedBox(
-              width: gamesButtonWidth,
-              child: _buildGameButton(
-                context,
-                label: 'Web Games',
-                onPressed: () {
-                  AudioService.instance.playClickSound();
-                  _launchWebGamesUrl(context);
-                },
-                gradient: const LinearGradient(
-                  colors: [AppColors.info, AppColors.infoDark],
+              SizedBox(width: buttonSpacing),
+              SizedBox(
+                width: gamesButtonWidth,
+                child: _buildGameButton(
+                  context,
+                  label: 'Web Games',
+                  onPressed: () {
+                    AudioService.instance.playClickSound();
+                    _launchWebGamesUrl(context);
+                  },
+                  gradient: const LinearGradient(
+                    colors: [AppColors.info, AppColors.infoDark],
+                  ),
+                  icon: Icons.computer_rounded,
                 ),
-                icon: Icons.computer_rounded,
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -765,99 +900,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           );
   }
 
-  Widget _buildSoundButton(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: Stream.periodic(const Duration(milliseconds: 100))
-          .map((_) => AudioService.instance.isSoundEnabled),
-      builder: (context, snapshot) {
-        final isSoundEnabled = snapshot.data ?? AudioService.instance.isSoundEnabled;
-        return Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.neutral, AppColors.neutralDark],
-                  ),
-                  borderRadius: BorderRadius.circular(_getResponsiveValue(context,
-                    smallMobile: 8.0,
-                    mobile: 10.0,
-                    largeMobile: 12.0,
-                    tablet: 14.0,
-                    desktop: 16.0,
-                  )),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neutral.withValues(alpha: 0.4),
-                      blurRadius: 15,
-                      offset: const Offset(0, 6),
-                      spreadRadius: 2,
-                    ),
-                    BoxShadow(
-                      color: AppColors.neutral.withValues(alpha: 0.2),
-                      blurRadius: 25,
-                      offset: const Offset(0, 10),
-                      spreadRadius: 4,
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      AudioService.instance.playClickSound();
-                      AudioService.instance.toggleSound();
-                    },
-                    borderRadius: BorderRadius.circular(_getResponsiveValue(context,
-                      smallMobile: 8.0,
-                      mobile: 10.0,
-                      largeMobile: 12.0,
-                      tablet: 14.0,
-                      desktop: 16.0,
-                    )),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: _getResponsiveValue(context,
-                          smallMobile: 6.0,
-                          mobile: 8.0,
-                          largeMobile: 10.0,
-                          tablet: 12.0,
-                          desktop: 14.0,
-                        ),
-                        horizontal: _getResponsiveValue(context,
-                          smallMobile: 8.0,
-                          mobile: 10.0,
-                          largeMobile: 12.0,
-                          tablet: 14.0,
-                          desktop: 16.0,
-                        ),
-                      ),
-                      child: Icon(
-                        isSoundEnabled
-                            ? Icons.volume_up_rounded
-                            : Icons.volume_off_rounded,
-                        size: _getResponsiveValue(context,
-                          smallMobile: 16.0,
-                          mobile: 18.0,
-                          largeMobile: 20.0,
-                          tablet: 22.0,
-                          desktop: 24.0,
-                        ),
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-      },
-    );
-  }
 
   Widget _buildGameButton(
     BuildContext context, {
@@ -1277,95 +1319,110 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                 child: InkWell(
                   onTap: widget.isUnlocked ? widget.onTap : null,
                   borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                    padding: EdgeInsets.all(widget.cardPadding),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Level number with glassmorphism effect, lock icon, or checkmark
-                        Container(
-                          width: widget.iconSize,
-                          height: widget.iconSize,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: _getIconContainerGradient(),
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                  child: Stack(
+                    children: [
+                      // Main content - centered
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        padding: EdgeInsets.all(widget.cardPadding),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Level number - always shown, centered
+                            Text(
+                              '${widget.level}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22 + (_hoverAnimation.value * 2),
+                                fontWeight: FontWeight.w900,
+                                color: _getLevelNumberColor(),
+                                shadows: _getLevelNumberShadows(),
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: _getIconContainerBorderColor(),
-                              width: 1.5 + (_hoverAnimation.value * 0.5),
+                            // Checkmark icon for completed levels
+                            if (widget.isCompleted) ...[
+                              SizedBox(height: widget.checkmarkSpacing),
+                              Container(
+                                width: widget.iconSize,
+                                height: widget.iconSize,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: _getIconContainerGradient(),
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: _getIconContainerBorderColor(),
+                                    width: 1.5 + (_hoverAnimation.value * 0.5),
+                                  ),
+                                  boxShadow: _getIconContainerShadows(),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    color: Colors.white,
+                                    size: widget.iconSize * 0.5 + (_hoverAnimation.value * 2),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            // Lock icon in circle - only for locked levels
+                            if (!widget.isUnlocked) ...[
+                              SizedBox(height: widget.checkmarkSpacing),
+                              Container(
+                                width: widget.iconSize,
+                                height: widget.iconSize,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: _getIconContainerGradient(),
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: _getIconContainerBorderColor(),
+                                    width: 1.5 + (_hoverAnimation.value * 0.5),
+                                  ),
+                                  boxShadow: _getIconContainerShadows(),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey.shade400,
+                                    size: widget.iconSize * 0.5 + (_hoverAnimation.value * 2),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      // Dot at top-right corner for open/unlocked levels
+                      if (widget.isUnlocked && !widget.isCompleted)
+                        Positioned(
+                          top: widget.cardPadding + 2,
+                          right: widget.cardPadding + 2,
+                          child: Container(
+                            width: 8 + (_hoverAnimation.value * 1),
+                            height: 8 + (_hoverAnimation.value * 1),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
                             ),
-                            boxShadow: _getIconContainerShadows(),
-                          ),
-                          child: Center(
-                            child: _getIconWidget(),
                           ),
                         ),
-                        // Checkmark icon for completed levels (outside the circle)
-                        if (widget.isCompleted) ...[
-                          SizedBox(height: widget.checkmarkSpacing),
-                          Icon(
-                            Icons.check_circle,
-                            color: AppColors.completedAccent,
-                            size: widget.checkmarkSize + (_hoverAnimation.value * 2),
-                          ),
-                        ],
-                        // Only show grid size and difficulty for non-completed levels
-                        if (!widget.isCompleted) ...[
-                          SizedBox(height: widget.gridSpacing + 4.0),
-                          // Grid size indicator with enhanced styling
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: widget.gridPaddingH,
-                              vertical: widget.gridPaddingV,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.isUnlocked 
-                                ? Colors.white.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.05))
-                                : Colors.grey.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: widget.isUnlocked 
-                                  ? Colors.white.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.1))
-                                  : Colors.grey.withValues(alpha: 0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              '${widget.rows}×${widget.columns}',
-                              style: TextStyle(
-                                fontSize: widget.gridFontSize + (_hoverAnimation.value * 1),
-                                fontWeight: FontWeight.bold,
-                                color: widget.isUnlocked ? Colors.white : Colors.grey.shade400,
-                                letterSpacing: 0.5,
-                                shadows: widget.isUnlocked ? [
-                                  Shadow(
-                                    color: Colors.black87,
-                                    offset: const Offset(1, 1),
-                                    blurRadius: 2 + (_hoverAnimation.value * 1),
-                                  ),
-                                ] : null,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: widget.statusSpacing + 6.0),
-                          // Difficulty indicator or locked text
-                          Text(
-                            _getStatusText(),
-                            style: TextStyle(
-                              fontSize: widget.statusFontSize + (_hoverAnimation.value * 0.5),
-                              fontWeight: FontWeight.w600,
-                              color: _getStatusTextColor(),
-                              letterSpacing: 0.3,
-                              shadows: _getStatusTextShadows(),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -1387,10 +1444,11 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   List<Color> _getCardGradient() {
     if (widget.isCompleted) {
-      // Use same golden gradient as game tiles for consistency
-      return [const Color(0xFFE9AF51), const Color(0xFFD4A046)];
+      // Green gradient for completed/solved levels
+      return [AppColors.success, AppColors.successDark];
     } else if (widget.isUnlocked) {
-      return _getLevelGradient(widget.level);
+      // Blue gradient for open/unlocked levels
+      return [AppColors.info, AppColors.infoDark];
     } else {
       return _getLockedGradient();
     }
@@ -1398,7 +1456,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getCardBorderColor() {
     if (widget.isCompleted) {
-      return AppColors.completedAccent.withValues(alpha: 0.8 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.2));
     } else if (widget.isUnlocked) {
       return Colors.white.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.2));
     } else {
@@ -1409,32 +1467,25 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
   List<BoxShadow> _getCardShadows() {
     if (widget.isCompleted) {
       return [
-        // Main glow shadow with reduced intensity
+        // Main glow shadow with green color
         BoxShadow(
-          color: AppColors.completed.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 8 + (_hoverAnimation.value * 2),
-          offset: const Offset(0, 3),
-          spreadRadius: 1 + (_hoverAnimation.value * 0.5),
-        ),
-        // Gold accent glow with reduced intensity
-        BoxShadow(
-          color: AppColors.completedAccent.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.03)),
-          blurRadius: 10 + (_hoverAnimation.value * 3),
-          offset: const Offset(0, 4),
-          spreadRadius: 1.5 + (_hoverAnimation.value * 0.5),
+          color: AppColors.success.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
+          blurRadius: 12 + (_hoverAnimation.value * 4),
+          offset: const Offset(0, 5),
+          spreadRadius: 2 + (_hoverAnimation.value * 1),
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.03)),
-          blurRadius: 6 + (_hoverAnimation.value * 1.5),
-          offset: const Offset(0, 2),
+          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 8 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 3),
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
-        // Main glow shadow with hover enhancement
+        // Main glow shadow with blue color
         BoxShadow(
-          color: _getLevelGradient(widget.level).first.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
+          color: AppColors.info.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
           blurRadius: 12 + (_hoverAnimation.value * 4),
           offset: const Offset(0, 5),
           spreadRadius: 2 + (_hoverAnimation.value * 1),
@@ -1464,63 +1515,59 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
     }
   }
 
-  Widget _getIconWidget() {
+  Color _getLevelNumberColor() {
     if (widget.isCompleted) {
-      return Text(
-        '${widget.level}',
-        style: TextStyle(
-          fontSize: 22 + (_hoverAnimation.value * 2),
-          fontWeight: FontWeight.w900,
-          color: AppColors.completedAccent,
-          shadows: [
-            Shadow(
-              color: Colors.black87,
-              offset: const Offset(1, 1),
-              blurRadius: 4 + (_hoverAnimation.value * 2),
-            ),
-            Shadow(
-              color: Colors.white24,
-              offset: const Offset(-1, -1),
-              blurRadius: 2 + (_hoverAnimation.value * 1),
-            ),
-          ],
-        ),
-      );
+      return Colors.white;
     } else if (widget.isUnlocked) {
-      return Text(
-        '${widget.level}',
-        style: TextStyle(
-          fontSize: 22 + (_hoverAnimation.value * 2),
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-          shadows: [
-            Shadow(
-              color: Colors.black87,
-              offset: const Offset(1, 1),
-              blurRadius: 4 + (_hoverAnimation.value * 2),
-            ),
-            Shadow(
-              color: Colors.white24,
-              offset: const Offset(-1, -1),
-              blurRadius: 2 + (_hoverAnimation.value * 1),
-            ),
-          ],
-        ),
-      );
+      return Colors.white;
     } else {
-      return Icon(
-        Icons.lock,
-        color: Colors.grey.shade400,
-        size: 24,
-      );
+      return Colors.grey.shade400;
+    }
+  }
+
+  List<Shadow> _getLevelNumberShadows() {
+    if (widget.isCompleted) {
+      return [
+        Shadow(
+          color: Colors.black87,
+          offset: const Offset(1, 1),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+        ),
+        Shadow(
+          color: Colors.white24,
+          offset: const Offset(-1, -1),
+          blurRadius: 2 + (_hoverAnimation.value * 1),
+        ),
+      ];
+    } else if (widget.isUnlocked) {
+      return [
+        Shadow(
+          color: Colors.black87,
+          offset: const Offset(1, 1),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+        ),
+        Shadow(
+          color: Colors.white24,
+          offset: const Offset(-1, -1),
+          blurRadius: 2 + (_hoverAnimation.value * 1),
+        ),
+      ];
+    } else {
+      return [
+        Shadow(
+          color: Colors.black87,
+          offset: const Offset(0.5, 0.5),
+          blurRadius: 2,
+        ),
+      ];
     }
   }
 
   List<Color> _getIconContainerGradient() {
     if (widget.isCompleted) {
       return [
-        AppColors.completedAccent.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.1)),
-        AppColors.completedAccent.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
+        Colors.white.withValues(alpha: 0.25 + (_hoverAnimation.value * 0.1)),
+        Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
       ];
     } else if (widget.isUnlocked) {
       return [
@@ -1537,7 +1584,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getIconContainerBorderColor() {
     if (widget.isCompleted) {
-      return AppColors.completedAccent.withValues(alpha: 0.8 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.2));
     } else if (widget.isUnlocked) {
       return Colors.white.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.2));
     } else {
@@ -1549,9 +1596,9 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
     if (widget.isCompleted) {
       return [
         BoxShadow(
-          color: AppColors.completedAccent.withValues(alpha: 0.15 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 6 + (_hoverAnimation.value * 2),
-          offset: const Offset(0, 2),
+          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+          blurRadius: 4 + (_hoverAnimation.value * 2),
+          offset: const Offset(0, 1),
         ),
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
