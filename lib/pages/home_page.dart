@@ -18,6 +18,7 @@ import '../services/level_progression_service.dart';
 import '../services/audio_service.dart';
 import '../services/app_update_service.dart';
 import '../widgets/update_dialog.dart';
+import '../utils/game_utils.dart';
 import 'game_page.dart';
 import 'other_games_page.dart';
 
@@ -419,8 +420,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       itemCount: AppConstants.maxLevel,
       itemBuilder: (context, index) {
         final level = index + 1;
-        final gridSize = _getGridSize(level);
-        return _buildLevelCard(context, level, gridSize, index);
+        final gridDimensions = GameUtils.calculateGridSize(level);
+        return _buildLevelCard(context, level, gridDimensions.rows, gridDimensions.columns, index);
       },
     );
   }
@@ -978,8 +979,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           );
   }
 
-  Widget _buildLevelCard(BuildContext context, int level, int gridSize, int index) {
-    final difficulty = _getDifficultyText(gridSize);
+  Widget _buildLevelCard(BuildContext context, int level, int rows, int columns, int index) {
+    final maxDimension = rows > columns ? rows : columns;
+    final difficulty = _getDifficultyText(maxDimension);
     final isUnlocked = _unlockedLevels.contains(level);
     final isCompleted = _completedLevels.contains(level);
     
@@ -1066,7 +1068,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     return _LevelCard(
       level: level,
-      gridSize: gridSize,
+      rows: rows,
+      columns: columns,
       difficulty: difficulty,
       isUnlocked: isUnlocked,
       isCompleted: isCompleted,
@@ -1088,9 +1091,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
 
-  int _getGridSize(int level) {
-    return level + 2; // Level 1 = 3x3, Level 2 = 4x4, etc.
-  }
 
   String _getDifficultyText(int gridSize) {
     if (gridSize <= 4) return 'Easy';
@@ -1172,7 +1172,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 class _LevelCard extends StatefulWidget {
   final int level;
-  final int gridSize;
+  final int rows;
+  final int columns;
   final String difficulty;
   final bool isUnlocked;
   final bool isCompleted;
@@ -1190,7 +1191,8 @@ class _LevelCard extends StatefulWidget {
 
   const _LevelCard({
     required this.level,
-    required this.gridSize,
+    required this.rows,
+    required this.columns,
     required this.difficulty,
     required this.isUnlocked,
     required this.isCompleted,
@@ -1333,7 +1335,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                               ),
                             ),
                             child: Text(
-                              '${widget.gridSize}×${widget.gridSize}',
+                              '${widget.rows}×${widget.columns}',
                               style: TextStyle(
                                 fontSize: widget.gridFontSize + (_hoverAnimation.value * 1),
                                 fontWeight: FontWeight.bold,

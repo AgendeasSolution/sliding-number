@@ -1,6 +1,6 @@
 class AppConstants {
   // Game Configuration
-  static const int maxLevel = 9;
+  static const int maxLevel = 21;
   static const int emptyTileValue = 0;
   static const int shuffleMoves = 500; // Increased for more challenging shuffle
   

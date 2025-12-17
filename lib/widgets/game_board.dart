@@ -25,14 +25,16 @@ class GameBoard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use full width and calculate height to maintain square aspect ratio
+        // Calculate board dimensions based on aspect ratio
         final availableWidth = constraints.maxWidth;
-        final boardSize = availableWidth;
+        final aspectRatio = gameState.rows / gameState.columns;
+        final boardWidth = availableWidth;
+        final boardHeight = boardWidth * aspectRatio;
         
         return Center(
           child: SizedBox(
-            width: boardSize,
-            height: boardSize,
+            width: boardWidth,
+            height: boardHeight,
             child: GestureDetector(
               onVerticalDragEnd: onVerticalDragEnd,
               onHorizontalDragEnd: onHorizontalDragEnd,
@@ -56,21 +58,22 @@ class GameBoard extends StatelessWidget {
                 child: GridView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: gameState.gridSize,
+                    crossAxisCount: gameState.columns,
                     mainAxisSpacing: AppConstants.tileSpacing,
                     crossAxisSpacing: AppConstants.tileSpacing,
                   ),
-                  itemCount: gameState.gridSize * gameState.gridSize,
+                  itemCount: gameState.rows * gameState.columns,
                   itemBuilder: (context, index) {
                     final tileValue = gameState.board[index];
                     final isVisible = tileValue != AppConstants.emptyTileValue;
-                    final row = index ~/ gameState.gridSize;
-                    final col = index % gameState.gridSize;
+                    final row = index ~/ gameState.columns;
+                    final col = index % gameState.columns;
 
                     return GameTile(
                       tileValue: tileValue,
                       index: index,
-                      gridSize: gameState.gridSize,
+                      rows: gameState.rows,
+                      columns: gameState.columns,
                       isVisible: isVisible,
                       onTap: () => onTileTap(row, col),
                     );

@@ -6,15 +6,16 @@ import 'level_progression_service.dart';
 
 class GameService {
   static Future<GameState> initializeGame(int level) async {
-    final gridSize = GameUtils.calculateGridSize(level);
-    final solvedState = GameUtils.generateSolvedState(gridSize);
-    final emptyPos = Point(gridSize - 1, gridSize - 1);
+    final gridDimensions = GameUtils.calculateGridSize(level);
+    final solvedState = GameUtils.generateSolvedState(gridDimensions.rows, gridDimensions.columns);
+    final emptyPos = Point(gridDimensions.rows - 1, gridDimensions.columns - 1);
     final unlockedLevels = await LevelProgressionService.getUnlockedLevels();
     
     return GameState(
       currentLevel: level,
       maxLevel: AppConstants.maxLevel,
-      gridSize: gridSize,
+      rows: gridDimensions.rows,
+      columns: gridDimensions.columns,
       board: List.from(solvedState),
       initialBoard: List.from(solvedState),
       solvedState: solvedState,
@@ -28,30 +29,30 @@ class GameService {
   }
 
   /// Finds the position of the empty tile in the board
-  static Point<int> _findEmptyPosition(List<int> board, int gridSize) {
+  static Point<int> _findEmptyPosition(List<int> board, int rows, int columns) {
     for (int i = 0; i < board.length; i++) {
       if (board[i] == AppConstants.emptyTileValue) {
-        return Point(i ~/ gridSize, i % gridSize);
+        return Point(i ~/ columns, i % columns);
       }
     }
     // Fallback to bottom-right corner
-    return Point(gridSize - 1, gridSize - 1);
+    return Point(rows - 1, columns - 1);
   }
 
   static GameState shuffleBoard(GameState currentState) {
     final random = Random();
     var board = List<int>.from(currentState.solvedState);
-    var emptyPos = Point(currentState.gridSize - 1, currentState.gridSize - 1);
+    var emptyPos = Point(currentState.rows - 1, currentState.columns - 1);
 
     // First, perform aggressive random moves to scatter numbers
     for (int i = 0; i < AppConstants.shuffleMoves; i++) {
-      final neighbors = GameUtils.getNeighbors(emptyPos.x, emptyPos.y, currentState.gridSize);
+      final neighbors = GameUtils.getNeighbors(emptyPos.x, emptyPos.y, currentState.rows, currentState.columns);
       if (neighbors.isEmpty) break;
       final randomNeighbor = neighbors[random.nextInt(neighbors.length)];
       
       // Swap tiles
-      final tileIndex = randomNeighbor.x * currentState.gridSize + randomNeighbor.y;
-      final emptyIndex = emptyPos.x * currentState.gridSize + emptyPos.y;
+      final tileIndex = randomNeighbor.x * currentState.columns + randomNeighbor.y;
+      final emptyIndex = emptyPos.x * currentState.columns + emptyPos.y;
       
       final temp = board[tileIndex];
       board[tileIndex] = board[emptyIndex];
@@ -61,7 +62,7 @@ class GameService {
     }
 
     // Then, apply aggressive anti-sequential algorithm
-    board = _applyAntiSequentialShuffle(board, currentState.gridSize, random);
+    board = _applyAntiSequentialShuffle(board, currentState.rows, currentState.columns, random);
 
     return currentState.copyWith(
       board: board,
@@ -75,13 +76,13 @@ class GameService {
   }
 
   /// Aggressive shuffle that ensures no sequential numbers are adjacent
-  static List<int> _applyAntiSequentialShuffle(List<int> board, int gridSize, Random random) {
+  static List<int> _applyAntiSequentialShuffle(List<int> board, int rows, int columns, Random random) {
     final maxAttempts = 1000;
     int attempts = 0;
     
-    while (attempts < maxAttempts && _hasSequentialNeighbors(board, gridSize)) {
+    while (attempts < maxAttempts && _hasSequentialNeighbors(board, rows, columns)) {
       // Find all sequential pairs
-      final sequentialPairs = _findSequentialPairs(board, gridSize);
+      final sequentialPairs = _findSequentialPairs(board, rows, columns);
       
       if (sequentialPairs.isEmpty) break;
       
@@ -91,12 +92,12 @@ class GameService {
       final pos2 = pair['pos2'] as Point<int>;
       
       // Find a random position far from both positions
-      final farPos = _findFarPosition(pos1, pos2, gridSize, random);
+      final farPos = _findFarPosition(pos1, pos2, rows, columns, random);
       
       // Swap one of the sequential numbers with the far position
-      final index1 = pos1.x * gridSize + pos1.y;
-      final index2 = pos2.x * gridSize + pos2.y;
-      final farIndex = farPos.x * gridSize + farPos.y;
+      final index1 = pos1.x * columns + pos1.y;
+      final index2 = pos2.x * columns + pos2.y;
+      final farIndex = farPos.x * columns + farPos.y;
       
       // Choose which number to move (avoid moving empty tile)
       if (board[index1] != AppConstants.emptyTileValue) {
@@ -116,12 +117,12 @@ class GameService {
   }
 
   /// Check if board has any sequential numbers that are neighbors
-  static bool _hasSequentialNeighbors(List<int> board, int gridSize) {
+  static bool _hasSequentialNeighbors(List<int> board, int rows, int columns) {
     for (int i = 0; i < board.length; i++) {
       if (board[i] == AppConstants.emptyTileValue) continue;
       
-      final row = i ~/ gridSize;
-      final col = i % gridSize;
+      final row = i ~/ columns;
+      final col = i % columns;
       final currentValue = board[i];
       
       // Check all 8 directions (including diagonals)
@@ -132,8 +133,8 @@ class GameService {
           final newRow = row + dr;
           final newCol = col + dc;
           
-          if (newRow >= 0 && newRow < gridSize && newCol >= 0 && newCol < gridSize) {
-            final neighborIndex = newRow * gridSize + newCol;
+          if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < columns) {
+            final neighborIndex = newRow * columns + newCol;
             final neighborValue = board[neighborIndex];
             
             if (neighborValue != AppConstants.emptyTileValue) {
@@ -150,14 +151,14 @@ class GameService {
   }
 
   /// Find all pairs of sequential numbers that are neighbors
-  static List<Map<String, dynamic>> _findSequentialPairs(List<int> board, int gridSize) {
+  static List<Map<String, dynamic>> _findSequentialPairs(List<int> board, int rows, int columns) {
     final pairs = <Map<String, dynamic>>[];
     
     for (int i = 0; i < board.length; i++) {
       if (board[i] == AppConstants.emptyTileValue) continue;
       
-      final row = i ~/ gridSize;
-      final col = i % gridSize;
+      final row = i ~/ columns;
+      final col = i % columns;
       final currentValue = board[i];
       
       // Check all 8 directions (including diagonals)
@@ -168,8 +169,8 @@ class GameService {
           final newRow = row + dr;
           final newCol = col + dc;
           
-          if (newRow >= 0 && newRow < gridSize && newCol >= 0 && newCol < gridSize) {
-            final neighborIndex = newRow * gridSize + newCol;
+          if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < columns) {
+            final neighborIndex = newRow * columns + newCol;
             final neighborValue = board[neighborIndex];
             
             if (neighborValue != AppConstants.emptyTileValue) {
@@ -192,14 +193,14 @@ class GameService {
   }
 
   /// Find a position that is far from both given positions
-  static Point<int> _findFarPosition(Point<int> pos1, Point<int> pos2, int gridSize, Random random) {
-    final maxDistance = (gridSize * 0.7).round(); // At least 70% of grid size away
+  static Point<int> _findFarPosition(Point<int> pos1, Point<int> pos2, int rows, int columns, Random random) {
+    final maxDistance = ((rows + columns) * 0.35).round(); // At least 35% of average dimension away
     int attempts = 0;
     
     while (attempts < 100) {
       final candidate = Point(
-        random.nextInt(gridSize),
-        random.nextInt(gridSize),
+        random.nextInt(rows),
+        random.nextInt(columns),
       );
       
       final distance1 = (candidate.x - pos1.x).abs() + (candidate.y - pos1.y).abs();
@@ -213,7 +214,7 @@ class GameService {
     }
     
     // Fallback: return a random position
-    return Point(random.nextInt(gridSize), random.nextInt(gridSize));
+    return Point(random.nextInt(rows), random.nextInt(columns));
   }
 
 
@@ -221,7 +222,7 @@ class GameService {
     if (!currentState.isGameActive) return currentState;
     
     // Find the actual empty position in the current board
-    final actualEmptyPos = _findEmptyPosition(currentState.board, currentState.gridSize);
+    final actualEmptyPos = _findEmptyPosition(currentState.board, currentState.rows, currentState.columns);
     final targetPos = Point(row, col);
     
     // Check if the target position is adjacent to the empty position
@@ -230,8 +231,8 @@ class GameService {
     }
 
     final newBoard = List<int>.from(currentState.board);
-    final tileIndex = row * currentState.gridSize + col;
-    final emptyIndex = actualEmptyPos.x * currentState.gridSize + actualEmptyPos.y;
+    final tileIndex = row * currentState.columns + col;
+    final emptyIndex = actualEmptyPos.x * currentState.columns + actualEmptyPos.y;
 
     // Verify the tile at target position is not empty
     if (newBoard[tileIndex] == AppConstants.emptyTileValue) {

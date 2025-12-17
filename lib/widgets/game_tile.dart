@@ -6,7 +6,8 @@ import '../utils/game_utils.dart';
 class GameTile extends StatelessWidget {
   final int tileValue;
   final int index;
-  final int gridSize;
+  final int rows;
+  final int columns;
   final VoidCallback onTap;
   final bool isVisible;
 
@@ -14,7 +15,8 @@ class GameTile extends StatelessWidget {
     super.key,
     required this.tileValue,
     required this.index,
-    required this.gridSize,
+    required this.rows,
+    required this.columns,
     required this.onTap,
     required this.isVisible,
   });
@@ -50,7 +52,7 @@ class GameTile extends StatelessWidget {
             child: Text(
               isVisible ? '$tileValue' : '',
               style: TextStyle(
-                fontSize: GameUtils.getTileFontSize(gridSize),
+                fontSize: GameUtils.getTileFontSize(rows, columns),
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),

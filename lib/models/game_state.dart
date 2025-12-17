@@ -3,7 +3,8 @@ import 'dart:math';
 class GameState {
   final int currentLevel;
   final int maxLevel;
-  final int gridSize;
+  final int rows;
+  final int columns;
   final List<int> board;
   final List<int> initialBoard;
   final List<int> solvedState;
@@ -17,7 +18,8 @@ class GameState {
   const GameState({
     required this.currentLevel,
     required this.maxLevel,
-    required this.gridSize,
+    required this.rows,
+    required this.columns,
     required this.board,
     required this.initialBoard,
     required this.solvedState,
@@ -29,10 +31,14 @@ class GameState {
     required this.unlockedLevels,
   });
 
+  // For backward compatibility, gridSize returns the maximum dimension
+  int get gridSize => rows > columns ? rows : columns;
+
   GameState copyWith({
     int? currentLevel,
     int? maxLevel,
-    int? gridSize,
+    int? rows,
+    int? columns,
     List<int>? board,
     List<int>? initialBoard,
     List<int>? solvedState,
@@ -46,7 +52,8 @@ class GameState {
     return GameState(
       currentLevel: currentLevel ?? this.currentLevel,
       maxLevel: maxLevel ?? this.maxLevel,
-      gridSize: gridSize ?? this.gridSize,
+      rows: rows ?? this.rows,
+      columns: columns ?? this.columns,
       board: board ?? this.board,
       initialBoard: initialBoard ?? this.initialBoard,
       solvedState: solvedState ?? this.solvedState,

@@ -14,8 +14,9 @@ class GoalBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final aspectRatio = gameState.rows / gameState.columns;
     return AspectRatio(
-      aspectRatio: 1,
+      aspectRatio: aspectRatio,
       child: Container(
         padding: const EdgeInsets.all(6.0),
         decoration: BoxDecoration(
@@ -33,11 +34,11 @@ class GoalBoard extends StatelessWidget {
         child: GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: gameState.gridSize,
+            crossAxisCount: gameState.columns,
             mainAxisSpacing: 6,
             crossAxisSpacing: 6,
           ),
-          itemCount: gameState.gridSize * gameState.gridSize,
+          itemCount: gameState.rows * gameState.columns,
           itemBuilder: (context, index) {
             final value = gameState.solvedState[index];
             final isEmpty = value == AppConstants.emptyTileValue;
@@ -58,7 +59,7 @@ class GoalBoard extends StatelessWidget {
                 child: Text(
                   isEmpty ? '' : '$value',
                   style: TextStyle(
-                    fontSize: GameUtils.getGoalTileFontSize(gameState.gridSize),
+                    fontSize: GameUtils.getGoalTileFontSize(gameState.rows, gameState.columns),
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
