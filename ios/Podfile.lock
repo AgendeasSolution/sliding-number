@@ -15,11 +15,11 @@ PODS:
   - FBSDKShareKit (18.0.1):
     - FBSDKCoreKit (= 18.0.1)
   - Flutter (1.0.0)
-  - Google-Mobile-Ads-SDK (12.2.0):
+  - Google-Mobile-Ads-SDK (12.14.0):
     - GoogleUserMessagingPlatform (>= 1.1)
-  - google_mobile_ads (6.0.0):
+  - google_mobile_ads (7.0.0):
     - Flutter
-    - Google-Mobile-Ads-SDK (~> 12.2.0)
+    - Google-Mobile-Ads-SDK (~> 12.14.0)
     - webview_flutter_wkwebview
   - GoogleMobileAdsMediationAppLovin (13.5.0.0):
     - AppLovinSDK (= 13.5.0)
@@ -161,7 +161,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppLovinSDK: bf8974163120910e6b902e9610e7c5a2c0f577b6
-  audioplayers_darwin: 4027b33a8f471d996c13f71cb77f0b1583b5d923
+  audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
   FBAEMKit: b2ed182002dbcb65d5a60059c9693d322186cd00
   FBAudienceNetwork: f4ab9e073ab98c884dbdb5ffe7c861272b380bc2
   FBSDKCoreKit: 7f96852f2539bdb88ba8d47e5ab4ae70a6f8d691
@@ -169,8 +169,8 @@ SPEC CHECKSUMS:
   FBSDKLoginKit: f48c06446995cd209332831f692cea28b26e51da
   FBSDKShareKit: d3fef7f6690e173369134beb5f43983d7338e933
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
-  google_mobile_ads: cab27248050510554aa646195eacc393ce7406ad
+  Google-Mobile-Ads-SDK: 4534fd2dfcd3f705c5485a6633c5188d03d4eed2
+  google_mobile_ads: df3008bafbe1f2ad6862f87334e560d2f047f902
   GoogleMobileAdsMediationAppLovin: 56b7465bf2afc594982b7820d8db8ea092a57ffc
   GoogleMobileAdsMediationFacebook: 664fd50364d36531196bf24fe62d2db84cad72d0
   GoogleMobileAdsMediationIronSource: e5e38b0f52019fcc82116f32df37868ce8dce43b
@@ -178,13 +178,13 @@ SPEC CHECKSUMS:
   GoogleUserMessagingPlatform: befe603da6501006420c206222acd449bba45a9c
   IronSourceAdQualitySDK: 004e42fe12e9e95a0665eaf35ac852a73a757d10
   IronSourceSDK: 42f7abe6ab74a76d27d9325718471ebe72dde3d2
-  onesignal_flutter: f69ff09eeaf41cea4b7a841de5a61e79e7fd9a5a
+  onesignal_flutter: 3a2b51f9262c851166a882a553d71a8ccec4e29c
   OneSignalXCFramework: 7112f3e89563e41ebc23fe807788f11985ac541c
-  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
-  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
+  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   UnityAds: 64164885dd38214bfc556eb074ab1995cc613fbf
-  url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
-  webview_flutter_wkwebview: 29eb20d43355b48fe7d07113835b9128f84e3af4
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+  webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
 
 PODFILE CHECKSUM: fb64049fb7e55c7e71ed1bc002fcc1b482e606a7
 
