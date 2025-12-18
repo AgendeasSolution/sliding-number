@@ -41,6 +41,11 @@ class AppTheme {
           fit: BoxFit.cover,
         ),
       );
+  
+  // Wood theme background - dark brown wood grain
+  static BoxDecoration get woodBackground => const BoxDecoration(
+        color: AppColors.woodBackground,
+      );
 
   static BoxDecoration get backgroundGradient => const BoxDecoration(
     gradient: LinearGradient(

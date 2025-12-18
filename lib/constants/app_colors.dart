@@ -78,4 +78,13 @@ class AppColors {
   static const Color accentPurpleDark = Color(0xFF7B1FA2);
   static const Color accentBlue = Color(0xFF2196F3);
   static const Color accentBlueDark = Color(0xFF1976D2);
+  
+  // Wood Theme Colors - Rustic, warm aesthetic
+  static const Color woodBackground = Color(0xFF4E2E1D); // Dark brown wood grain
+  static const Color woodTitleMain = Color(0xFFEBC147); // Vibrant mustard yellow
+  static const Color woodTitleSub = Color(0xFFD9BB7B); // Lighter muted gold
+  static const Color woodButtonBorderDark = Color(0xFF5B3C2D); // Dark brown border
+  static const Color woodButtonBorderLight = Color(0xFFA1765D); // Lighter brown inner border
+  static const Color woodButtonFill = Color(0xFFF8E7C5); // Light beige/cream fill
+  static const Color woodButtonText = Color(0xFF5A3A28); // Dark brown text
 }

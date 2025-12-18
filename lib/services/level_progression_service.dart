@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LevelProgressionService {
   static const String _unlockedLevelsKey = 'unlocked_levels';
   static const String _completedLevelsKey = 'completed_levels';
+  static const String _lastOpenedLevelKey = 'last_opened_level';
   static const int _defaultUnlockedLevels = 1; // Only level 1 is unlocked by default
 
   /// Get the list of unlocked levels
@@ -125,5 +126,25 @@ class LevelProgressionService {
   /// Reset completed levels
   static Future<void> resetCompletedLevels() async {
     await setCompletedLevels([]);
+  }
+
+  /// Get the last opened level
+  static Future<int> getLastOpenedLevel() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(_lastOpenedLevelKey) ?? 1;
+    } catch (e) {
+      return 1;
+    }
+  }
+
+  /// Set the last opened level
+  static Future<void> setLastOpenedLevel(int level) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_lastOpenedLevelKey, level);
+    } catch (e) {
+      // Handle error silently
+    }
   }
 }

@@ -40,6 +40,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   List<int> _unlockedLevels = [1]; // Default to only level 1 unlocked
   List<int> _completedLevels = []; // Track completed levels
+  int _lastOpenedLevel = 1; // Track the last opened level
 
   @override
   void initState() {
@@ -91,11 +92,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           .timeout(const Duration(seconds: 3), onTimeout: () => [1]);
       final completedLevels = await LevelProgressionService.getCompletedLevels()
           .timeout(const Duration(seconds: 3), onTimeout: () => <int>[]);
+      final lastOpenedLevel = await LevelProgressionService.getLastOpenedLevel()
+          .timeout(const Duration(seconds: 3), onTimeout: () => 1);
       
       if (mounted) {
         setState(() {
           _unlockedLevels = unlockedLevels;
           _completedLevels = completedLevels;
+          _lastOpenedLevel = lastOpenedLevel;
         });
       }
     } catch (e) {
@@ -104,6 +108,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         setState(() {
           _unlockedLevels = [1];
           _completedLevels = [];
+          _lastOpenedLevel = 1;
         });
       }
     }
@@ -330,7 +335,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       margin: EdgeInsets.only(top: topMargin),
       child: Column(
         children: [
-          // Main title text - no background container
+          // Main title text - matching splash screen
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               begin: Alignment.topLeft,
@@ -1170,6 +1175,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       difficulty: difficulty,
       isUnlocked: isUnlocked,
       isCompleted: isCompleted,
+      isLastOpened: level == _lastOpenedLevel,
       cardPadding: cardPadding,
       iconSize: iconSize,
       checkmarkSpacing: checkmarkSpacing,
@@ -1197,6 +1203,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _startLevel(BuildContext context, int level) async {
+    // Save the last opened level
+    await LevelProgressionService.setLastOpenedLevel(level);
+    if (mounted) {
+      setState(() {
+        _lastOpenedLevel = level;
+      });
+    }
+    
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => GamePage(initialLevel: level),
@@ -1274,6 +1288,7 @@ class _LevelCard extends StatefulWidget {
   final String difficulty;
   final bool isUnlocked;
   final bool isCompleted;
+  final bool isLastOpened;
   final VoidCallback? onTap;
   final double cardPadding;
   final double iconSize;
@@ -1293,6 +1308,7 @@ class _LevelCard extends StatefulWidget {
     required this.difficulty,
     required this.isUnlocked,
     required this.isCompleted,
+    required this.isLastOpened,
     this.onTap,
     required this.cardPadding,
     required this.iconSize,
@@ -1315,125 +1331,113 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
+    // Show actual grid dimensions (rows x columns)
+    final gridSizeText = '${widget.rows}X${widget.columns}';
+    
     return GestureDetector(
       onTap: widget.isUnlocked ? widget.onTap : null,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: _getCardGradient(),
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: Opacity(
+        opacity: widget.isUnlocked ? 1.0 : 0.6,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.woodButtonFill,
+            borderRadius: BorderRadius.circular(16),
+            // Outer dark brown border for wooden inset effect
+            border: Border.all(
+              color: AppColors.woodButtonBorderDark,
+              width: 2.5,
+            ),
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: _getCardBorderColor(),
-            width: 2.0,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.isUnlocked ? widget.onTap : null,
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              children: [
-                // Main content - centered
-                Container(
+          child: Container(
+            margin: const EdgeInsets.all(2.5), // Creates the inset effect
+            decoration: BoxDecoration(
+              color: AppColors.woodButtonFill,
+              borderRadius: BorderRadius.circular(13.5),
+              // Inner lighter brown border
+              border: Border.all(
+                color: AppColors.woodButtonBorderLight,
+                width: 1.0,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.isUnlocked ? widget.onTap : null,
+                borderRadius: BorderRadius.circular(13.5),
+                child: Container(
                   width: double.infinity,
                   height: double.infinity,
-                  padding: EdgeInsets.all(widget.cardPadding),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
+                  padding: EdgeInsets.all(widget.cardPadding * 1.5),
+                  child: Stack(
                     children: [
-                      // Level number with enhanced styling
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          '${widget.level}',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.orbitron(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: _getLevelNumberColor(),
-                            shadows: _getLevelNumberShadows(),
-                            letterSpacing: 1.0,
-                          ),
+                      // Main content - centered
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Level number - larger and more prominent
+                            Text(
+                              '${widget.level}',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.orbitron(
+                                fontSize: widget.iconSize * 0.65,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.woodButtonText,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            SizedBox(height: widget.cardPadding * 0.8),
+                            // Grid size text - smaller
+                            Text(
+                              gridSizeText,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.orbitron(
+                                fontSize: widget.iconSize * 0.35,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.woodButtonText.withValues(alpha: 0.8),
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      // Checkmark icon for completed levels
-                      if (widget.isCompleted) ...[
-                        SizedBox(height: widget.checkmarkSpacing + 4),
-                        Container(
-                          width: widget.iconSize + 4,
-                          height: widget.iconSize + 4,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withValues(alpha: 0.4),
-                                Colors.white.withValues(alpha: 0.2),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              width: 2.0,
-                            ),
+                      // Lock icon for locked levels - positioned at top right
+                      if (!widget.isUnlocked)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Icon(
+                            Icons.lock,
+                            color: AppColors.woodButtonText.withValues(alpha: 0.7),
+                            size: widget.iconSize * 0.35,
                           ),
-                          child: Center(
-                            child: Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                              size: widget.iconSize * 0.6,
+                        ),
+                      // Dot indicator for last opened level - positioned at top right (only if unlocked, not based on completion)
+                      if (widget.isLastOpened && widget.isUnlocked)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryGold,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryGold.withValues(alpha: 0.6),
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                      // Lock icon in circle - only for locked levels
-                      if (!widget.isUnlocked) ...[
-                        SizedBox(height: widget.checkmarkSpacing + 4),
-                        Container(
-                          width: widget.iconSize + 4,
-                          height: widget.iconSize + 4,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.grey.withValues(alpha: 0.3),
-                                Colors.grey.withValues(alpha: 0.1),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.grey.withValues(alpha: 0.4),
-                              width: 2.0,
-                            ),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.lock,
-                              color: Colors.grey.shade300,
-                              size: widget.iconSize * 0.6,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
