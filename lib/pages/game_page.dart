@@ -1124,15 +1124,6 @@ class _GamePageState extends State<GamePage> {
               ],
             ),
           ),
-          ModalFooter(
-            child: GameButton(
-              label: '✕ Close',
-              onPressed: () => Navigator.of(context).pop(),
-              gradient: const LinearGradient(
-                colors: [AppColors.neutral, AppColors.neutralDark],
-              ),
-            ),
-          ),
         ],
       ),
     );
