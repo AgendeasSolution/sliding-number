@@ -114,17 +114,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     try {
       // Use timeout to prevent ANR - never wait more than 8 seconds
-      final isUpdateAvailable = await AppUpdateService.instance.isUpdateAvailable()
+      final isUpdateAvailable = await AppUpdateService.instance
+          .isUpdateAvailable()
           .timeout(
             const Duration(seconds: 8),
             onTimeout: () => false,
           );
-      
-      if (isUpdateAvailable && mounted) {
-        // Show update dialog only if still mounted
-        if (mounted && context.mounted) {
-          UpdateDialog.show(context);
-        }
+
+      if (!isUpdateAvailable || !mounted) return;
+
+      // Only show the update dialog once per day
+      final shouldShowToday =
+          await AppUpdateService.instance.shouldShowUpdatePromptToday();
+
+      if (shouldShowToday && mounted && context.mounted) {
+        UpdateDialog.show(context);
+        // Record that we've shown it for today
+        AppUpdateService.instance.recordUpdatePromptShown();
       }
     } catch (e) {
       // Silent error handling - never interrupt user experience

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service to check for app updates from Play Store and App Store
@@ -20,6 +21,7 @@ class AppUpdateService {
   static const String _androidPackageName = 'com.fgtp.sliding_tile';
   static const String _iosBundleId = 'com.fgtp.slidingTile';
   static const String _iosAppId = '6754685051'; // App Store App ID
+  static const String _lastUpdatePromptKey = 'last_update_prompt_timestamp';
 
   /// Get current app version using platform channels
   /// Returns null on any error or timeout to prevent blocking
@@ -174,6 +176,43 @@ class AppUpdateService {
       return _compareVersions(latestVersion, currentVersion) > 0;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Returns true if we haven't shown the update dialog yet "today".
+  /// This is based on calendar day (local time), not exact 24h difference,
+  /// so the user will see at most one prompt per day.
+  Future<bool> shouldShowUpdatePromptToday() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastTimestamp = prefs.getInt(_lastUpdatePromptKey);
+      if (lastTimestamp == null) {
+        return true;
+      }
+
+      final last = DateTime.fromMillisecondsSinceEpoch(lastTimestamp);
+      final now = DateTime.now();
+
+      final sameDay =
+          last.year == now.year && last.month == now.month && last.day == now.day;
+
+      return !sameDay;
+    } catch (e) {
+      // If anything goes wrong, default to showing (we still throttle by update check)
+      return true;
+    }
+  }
+
+  /// Record that we have just shown the update prompt.
+  Future<void> recordUpdatePromptShown() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+        _lastUpdatePromptKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    } catch (e) {
+      // Silent failure – never block UX because of storage issues
     }
   }
 
