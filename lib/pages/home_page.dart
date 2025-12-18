@@ -393,7 +393,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  /// Returns the "current" playable level that should show the dot indicator.
+  ///
+  /// Priority:
+  /// 1. The lowest unlocked level that is not yet completed.
+  /// 2. If all unlocked levels are completed, show the highest completed level.
+  /// 3. Fallback to the last opened level if no other rule applies.
+  int _getCurrentPlayableLevel() {
+    // 1. Find the smallest unlocked level that is not completed
+    final pendingUnlockedLevels = _unlockedLevels
+        .where((level) => !_completedLevels.contains(level))
+        .toList()
+      ..sort();
 
+    if (pendingUnlockedLevels.isNotEmpty) {
+      return pendingUnlockedLevels.first;
+    }
+
+    // 2. If everything unlocked is completed, highlight the highest completed level
+    if (_completedLevels.isNotEmpty) {
+      final completedSorted = List<int>.from(_completedLevels)..sort();
+      return completedSorted.last;
+    }
+
+    // 3. Fallback – should rarely be needed, but keeps previous behaviour
+    return _lastOpenedLevel;
+  }
 
   Widget _buildLevelGrid(BuildContext context) {
     // Carousel with 3x3 grid per page
@@ -1175,7 +1200,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       difficulty: difficulty,
       isUnlocked: isUnlocked,
       isCompleted: isCompleted,
-      isLastOpened: level == _lastOpenedLevel,
+      isLastOpened: level == _getCurrentPlayableLevel(),
       cardPadding: cardPadding,
       iconSize: iconSize,
       checkmarkSpacing: checkmarkSpacing,
