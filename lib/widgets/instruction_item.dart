@@ -18,14 +18,14 @@ class InstructionItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
+          Text(icon, style: const TextStyle(fontSize: 18)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
               style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
+                fontSize: 15,
+                color: AppColors.textWhite,
                 height: 1.5,
               ),
             ),

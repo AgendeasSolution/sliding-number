@@ -216,8 +216,13 @@ class _GamePageState extends State<GamePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          ModalHeader(
+            title: 'Exit Game',
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
             child: Column(
               children: [
                 const Text(
@@ -225,7 +230,7 @@ class _GamePageState extends State<GamePage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textWhite,
                   ),
                 ),
               ],
@@ -786,22 +791,34 @@ class _GamePageState extends State<GamePage> {
     bool showWatchAd = false,
   }) {
     final bool isDisabled = !isEnabled;
-    
+
     return Opacity(
       opacity: isDisabled ? 0.5 : 1.0,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: isDisabled ? AppColors.neutralDark : color,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isDisabled
-              ? []
-              : [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          // Wooden-style buttons to match home page & tiles (no shadow)
+          gradient: isDisabled
+              ? const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFEAD7B6),
+                    Color(0xFFD0B48A),
+                  ],
+                )
+              : const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFF8E7C5),
+                    Color(0xFFE2C89F),
+                  ],
+                ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.woodButtonBorderDark,
+            width: 2,
+          ),
         ),
         child: ElevatedButton(
           onPressed: isDisabled ? null : onPressed,
@@ -810,7 +827,7 @@ class _GamePageState extends State<GamePage> {
             shadowColor: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
           child: SizedBox(
@@ -818,20 +835,18 @@ class _GamePageState extends State<GamePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon at the top (without square container)
                 Icon(
                   icon,
-                  color: Colors.black,
+                  color: AppColors.woodButtonText,
                   size: 20,
                 ),
                 const SizedBox(height: 4),
-                // Button name below icon - allow wrapping
                 Flexible(
                   child: Text(
                     label,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.woodButtonText,
                       fontSize: 11,
                     ),
                     overflow: TextOverflow.visible,
@@ -841,13 +856,12 @@ class _GamePageState extends State<GamePage> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                // Watch Ad text below button name
                 Text(
                   showWatchAd && isEnabled ? 'Watch Ad' : '',
                   style: TextStyle(
                     fontSize: 9,
-                    color: Colors.black.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
+                    color: AppColors.woodButtonText.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
                     height: 1.0,
                   ),
                   textAlign: TextAlign.center,
@@ -885,27 +899,30 @@ class _GamePageState extends State<GamePage> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.gameBoardBackground, AppColors.tileBackgroundLight],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF5B3C2D),
+            Color(0xFF3F2719),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.gameBoardBorder,
-          width: 1,
+          color: AppColors.woodButtonBorderDark,
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGold.withValues(alpha: 0.2),
-            blurRadius: 15,
-            offset: const Offset(0, -6),
-            spreadRadius: 2,
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 8,
+            offset: const Offset(0, -1.5),
+            spreadRadius: 1,
           ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
+          // BoxShadow(
+          //   color: Colors.black.withValues(alpha: 0.5),
+          //   blurRadius: 20,
+          //   offset: const Offset(0, -8),
+          // ),
         ],
       ),
       child: Row(
@@ -1087,6 +1104,8 @@ class _GamePageState extends State<GamePage> {
           ModalHeader(
             title: '🎯 Goal - Level ${_gameState!.currentLevel}',
             color: AppColors.success,
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
           ),
           Padding(
             padding: const EdgeInsets.all(24),
@@ -1095,7 +1114,10 @@ class _GamePageState extends State<GamePage> {
                 const Text(
                   'Arrange the numbers in this order:',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textWhite,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 GoalBoard(gameState: _gameState!),

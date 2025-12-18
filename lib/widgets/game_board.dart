@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../constants/app_colors.dart';
 import '../models/game_state.dart';
 import 'game_tile.dart';
 
@@ -34,7 +35,7 @@ class GameBoard extends StatelessWidget {
         final aspectRatio = gameState.rows / gameState.columns;
         final boardWidth = availableWidth;
         final boardHeight = boardWidth * aspectRatio;
-        
+
         return Center(
           child: SizedBox(
             width: boardWidth,
@@ -43,59 +44,66 @@ class GameBoard extends StatelessWidget {
               onVerticalDragEnd: onVerticalDragEnd,
               onHorizontalDragEnd: onHorizontalDragEnd,
               child: Container(
-                padding: const EdgeInsets.all(4.0),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF374151), Color(0xFF4B5563)],
+                  // Outer wooden frame for the board (no shadow)
+                  color: AppColors.woodButtonFill,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppColors.woodButtonBorderDark,
+                    width: 3,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
                 ),
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: gameState.columns,
-                    mainAxisSpacing: AppConstants.tileSpacing,
-                    crossAxisSpacing: AppConstants.tileSpacing,
+                child: Container(
+                  margin: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    // Inner inset frame to mimic wooden tray
+                    color: AppColors.woodBackground.withValues(alpha: 0.96),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.woodButtonBorderLight,
+                      width: 1.5,
+                    ),
                   ),
-                  itemCount: gameState.rows * gameState.columns,
-                  itemBuilder: (context, index) {
-                    final tileValue = gameState.board[index];
-                    final isVisible = tileValue != AppConstants.emptyTileValue;
-                    final row = index ~/ gameState.columns;
-                    final col = index % gameState.columns;
-                    
-                    // Determine if this tile should be highlighted
-                    bool isHighlighted = false;
-                    if (isSwapMode && isVisible && swapDirection != null) {
-                      // Highlight tiles that can be swapped
-                      if (swapDirection == 'left') {
-                        // For left swap, highlight tiles that have a tile to their left
-                        isHighlighted = col > 0;
-                      } else if (swapDirection == 'right') {
-                        // For right swap, highlight tiles that have a tile to their right
-                        isHighlighted = col < gameState.columns - 1;
-                      }
-                    }
+                  padding: const EdgeInsets.all(6.0),
+                  child: GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: gameState.columns,
+                      mainAxisSpacing: AppConstants.tileSpacing,
+                      crossAxisSpacing: AppConstants.tileSpacing,
+                    ),
+                    itemCount: gameState.rows * gameState.columns,
+                    itemBuilder: (context, index) {
+                      final tileValue = gameState.board[index];
+                      final isVisible =
+                          tileValue != AppConstants.emptyTileValue;
+                      final row = index ~/ gameState.columns;
+                      final col = index % gameState.columns;
 
-                    return GameTile(
-                      tileValue: tileValue,
-                      index: index,
-                      rows: gameState.rows,
-                      columns: gameState.columns,
-                      isVisible: isVisible,
-                      isHighlighted: isHighlighted,
-                      onTap: () => onTileTap(row, col),
-                    );
-                  },
+                      // Determine if this tile should be highlighted
+                      bool isHighlighted = false;
+                      if (isSwapMode && isVisible && swapDirection != null) {
+                        // Highlight tiles that can be swapped
+                        if (swapDirection == 'left') {
+                          // For left swap, highlight tiles that have a tile to their left
+                          isHighlighted = col > 0;
+                        } else if (swapDirection == 'right') {
+                          // For right swap, highlight tiles that have a tile to their right
+                          isHighlighted = col < gameState.columns - 1;
+                        }
+                      }
+
+                      return GameTile(
+                        tileValue: tileValue,
+                        index: index,
+                        rows: gameState.rows,
+                        columns: gameState.columns,
+                        isVisible: isVisible,
+                        isHighlighted: isHighlighted,
+                        onTap: () => onTileTap(row, col),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

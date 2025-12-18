@@ -29,63 +29,50 @@ class UpdateDialog extends StatelessWidget {
     final isMobile = screenSize.width >= 360 && screenSize.width < 768;
     final isTablet = screenSize.width >= 768 && screenSize.width < 1024;
     final isDesktop = screenSize.width >= 1024;
-    
+
     // Responsive padding
-    final horizontalPadding = isSmallMobile ? 16.0 : isMobile ? 20.0 : isTablet ? 24.0 : 28.0;
-    final verticalPadding = isSmallMobile ? 16.0 : isMobile ? 20.0 : isTablet ? 24.0 : 28.0;
-    
+    final horizontalPadding =
+        isSmallMobile ? 16.0 : isMobile ? 20.0 : isTablet ? 24.0 : 28.0;
+    final verticalPadding =
+        isSmallMobile ? 16.0 : isMobile ? 20.0 : isTablet ? 24.0 : 28.0;
+
     // Responsive icon size (larger)
-    final iconSize = isSmallMobile ? 80.0 : isMobile ? 100.0 : isTablet ? 120.0 : 140.0;
-    
+    final iconSize =
+        isSmallMobile ? 80.0 : isMobile ? 100.0 : isTablet ? 120.0 : 140.0;
+
     // Responsive font sizes
-    final titleFontSize = isSmallMobile ? 18.0 : isMobile ? 20.0 : isTablet ? 22.0 : 24.0;
-    final descriptionFontSize = isSmallMobile ? 14.0 : isMobile ? 15.0 : isTablet ? 16.0 : 17.0;
-    final closeIconSize = isSmallMobile ? 20.0 : isMobile ? 22.0 : isTablet ? 24.0 : 26.0;
-    
+    final titleFontSize =
+        isSmallMobile ? 18.0 : isMobile ? 20.0 : isTablet ? 22.0 : 24.0;
+    final descriptionFontSize =
+        isSmallMobile ? 14.0 : isMobile ? 15.0 : isTablet ? 16.0 : 17.0;
+    final closeIconSize =
+        isSmallMobile ? 20.0 : isMobile ? 22.0 : isTablet ? 24.0 : 26.0;
+
     // Responsive spacing
-    final iconSpacing = isSmallMobile ? 16.0 : isMobile ? 18.0 : isTablet ? 20.0 : 22.0;
-    final textSpacing = isSmallMobile ? 10.0 : isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
-    final buttonSpacing = isSmallMobile ? 10.0 : isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
-    
+    final iconSpacing =
+        isSmallMobile ? 16.0 : isMobile ? 18.0 : isTablet ? 20.0 : 22.0;
+    final textSpacing =
+        isSmallMobile ? 10.0 : isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
+    final buttonSpacing =
+        isSmallMobile ? 10.0 : isMobile ? 12.0 : isTablet ? 14.0 : 16.0;
+
     // Bottom padding for safe area
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    
+
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0A0E27),
-            Color(0xFF1A1F3A),
-            Color(0xFF2A2F4D),
-            Color(0xFF1A1F3A),
-          ],
-          stops: [0.0, 0.3, 0.7, 1.0],
-        ),
+        // Wood-style bottom sheet to match game theme
+        color: AppColors.woodButtonFill,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(AppConstants.modalBorderRadius),
           topRight: Radius.circular(AppConstants.modalBorderRadius),
         ),
         border: Border(
           top: BorderSide(
-            color: AppColors.primaryGold.withValues(alpha: 0.4),
+            color: AppColors.woodButtonBorderDark,
             width: 2,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryGold.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 25,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
       child: SafeArea(
         child: Column(
@@ -95,12 +82,23 @@ class UpdateDialog extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: horizontalPadding,
-                vertical: isSmallMobile ? 12.0 : isMobile ? 14.0 : isTablet ? 16.0 : 18.0,
+                vertical: isSmallMobile
+                    ? 12.0
+                    : isMobile
+                        ? 14.0
+                        : isTablet
+                            ? 16.0
+                            : 18.0,
               ),
               decoration: BoxDecoration(
+                color: AppColors.woodBackground.withValues(alpha: 0.9),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppConstants.modalBorderRadius),
+                  topRight: Radius.circular(AppConstants.modalBorderRadius),
+                ),
                 border: Border(
                   bottom: BorderSide(
-                    color: AppColors.primaryGold.withValues(alpha: 0.2),
+                    color: AppColors.woodButtonBorderLight.withValues(alpha: 0.6),
                     width: 1,
                   ),
                 ),
@@ -110,18 +108,13 @@ class UpdateDialog extends StatelessWidget {
                 children: [
                   // Title
                   Expanded(
-                    child: ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
-                      ).createShader(bounds),
-                      child: Text(
-                        'Update Available',
-                        style: GoogleFonts.inter(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
+                    child: Text(
+                      'Update Available',
+                      style: GoogleFonts.inter(
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.woodTitleMain,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -137,17 +130,17 @@ class UpdateDialog extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: AppColors.woodButtonFill,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.primaryGold.withValues(alpha: 0.3),
+                            color: AppColors.woodButtonBorderDark,
                             width: 1.5,
                           ),
                         ),
                         child: Icon(
                           Icons.close_rounded,
                           size: closeIconSize,
-                          color: AppColors.primaryGold,
+                          color: AppColors.woodButtonText,
                         ),
                       ),
                     ),
@@ -171,21 +164,16 @@ class UpdateDialog extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                   SizedBox(height: iconSpacing),
-                  // Title with golden gradient
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
-                    ).createShader(bounds),
-                    child: Text(
-                      'New Version Available!',
-                      style: GoogleFonts.inter(
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                      ),
-                      textAlign: TextAlign.center,
+                  // Title
+                  Text(
+                    'New Version Available!',
+                    style: GoogleFonts.inter(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.woodTitleMain,
+                      letterSpacing: 0.5,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: textSpacing),
                   // Description
@@ -193,7 +181,7 @@ class UpdateDialog extends StatelessWidget {
                     'A new version of Sliding Number is available. Update now to enjoy the latest features and improvements!',
                     style: GoogleFonts.inter(
                       fontSize: descriptionFontSize,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppColors.woodButtonText.withValues(alpha: 0.9),
                       height: 1.5,
                       letterSpacing: 0.2,
                     ),
@@ -248,4 +236,3 @@ class UpdateDialog extends StatelessWidget {
     );
   }
 }
-

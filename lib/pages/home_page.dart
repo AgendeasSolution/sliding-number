@@ -1244,9 +1244,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const ModalHeader(title: 'How to Play'),
+          ModalHeader(
+            title: 'How to Play',
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
+          ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1263,15 +1267,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   text: 'Complete each level as quickly as possible!',
                 ),
               ],
-            ),
-          ),
-          ModalFooter(
-            child: GameButton(
-              label: '✕ Close',
-              onPressed: () => Navigator.of(context).pop(),
-              gradient: const LinearGradient(
-                colors: [AppColors.neutral, AppColors.neutralDark],
-              ),
             ),
           ),
         ],

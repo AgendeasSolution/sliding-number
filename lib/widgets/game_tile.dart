@@ -32,52 +32,56 @@ class GameTile extends StatelessWidget {
         opacity: isVisible ? 1.0 : 0.0,
         child: Container(
           decoration: BoxDecoration(
-            gradient: isVisible 
-                ? (isHighlighted 
+            // Wooden-style tiles to match home screen & reference game
+            gradient: isVisible
+                ? (isHighlighted
                     ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                         colors: [
                           AppColors.primaryGold,
                           AppColors.primaryGoldDark,
                         ],
                       )
                     : const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFF8E7C5), // light cream top
+                          Color(0xFFE2C89F), // slightly darker bottom
+                        ],
                       ))
                 : null,
-            border: isVisible 
-                ? (isHighlighted 
-                    ? Border.all(
-                        color: AppColors.primaryGold,
-                        width: 3,
-                      )
-                    : null)
+            border: isVisible
+                ? Border.all(
+                    color: AppColors.woodButtonBorderDark,
+                    width: isHighlighted ? 3 : 2,
+                  )
                 : Border.all(
-                    color: AppColors.primaryGold.withValues(alpha: 0.3),
+                    color: AppColors.woodButtonBorderLight.withValues(alpha: 0.5),
                     width: 2,
                   ),
             borderRadius: BorderRadius.circular(AppConstants.tileBorderRadius),
-            boxShadow: isVisible ? [
-              BoxShadow(
-                color: isHighlighted 
-                    ? AppColors.primaryGold.withValues(alpha: 0.5)
-                    : Colors.black.withValues(alpha: 0.2),
-                blurRadius: isHighlighted ? 12 : 8,
-                offset: const Offset(0, 4),
-                spreadRadius: isHighlighted ? 2 : 0,
-              ),
-            ] : [],
+            boxShadow: isVisible
+                ? [
+                    BoxShadow(
+                      color: isHighlighted
+                          ? AppColors.primaryGold.withValues(alpha: 0.55)
+                          : Colors.black.withValues(alpha: 0.25),
+                      blurRadius: isHighlighted ? 14 : 9,
+                      offset: const Offset(0, 5),
+                      spreadRadius: isHighlighted ? 2 : 0,
+                    ),
+                  ]
+                : [],
           ),
           child: Center(
             child: Text(
               isVisible ? '$tileValue' : '',
               style: TextStyle(
                 fontSize: GameUtils.getTileFontSize(rows, columns),
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w900,
+                color: AppColors.woodButtonText,
               ),
             ),
           ),
