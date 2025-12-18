@@ -730,19 +730,27 @@ class _GamePageState extends State<GamePage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.gameBoardBackground, AppColors.tileBackgroundLight],
+          colors: [
+            Color(0xFF2A2F4D),
+            Color(0xFF1A1F3A),
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.gameBoardBorder,
-          width: 1,
+          color: AppColors.primaryGold.withValues(alpha: 0.4),
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryGold.withValues(alpha: 0.15),
-            blurRadius: 10,
+            color: AppColors.primaryGold.withValues(alpha: 0.3),
+            blurRadius: 12,
             offset: const Offset(0, 4),
             spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1157,10 +1165,10 @@ class _GamePageState extends State<GamePage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
-              : LinearGradient(
+              : const LinearGradient(
                   colors: [
-                    Colors.grey.shade800,
-                    Colors.grey.shade900,
+                    Color(0xFF2A2F4D),
+                    Color(0xFF1A1F3A),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -1169,20 +1177,20 @@ class _GamePageState extends State<GamePage> {
           border: Border.all(
             color: isPrimary
                 ? AppColors.logoGradientEnd.withValues(alpha: 0.8)
-                : Colors.grey.shade600,
+                : AppColors.primaryGold.withValues(alpha: 0.4),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
               color: isPrimary
                   ? AppColors.logoGradientEnd.withValues(alpha: 0.4)
-                  : Colors.black.withValues(alpha: 0.3),
+                  : AppColors.primaryGold.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 6),
               spreadRadius: 2,
             ),
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),

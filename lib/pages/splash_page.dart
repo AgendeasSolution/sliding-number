@@ -96,18 +96,20 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final isSmallMobile = screenSize.width < 360 || screenSize.height < 600;
+    final isMobile = screenSize.width >= 360 && screenSize.width < 768;
+    final isLargeMobile = screenSize.width >= 600 && screenSize.width < 768;
     final isTablet = screenSize.width >= 768 && screenSize.width < 1024;
     final isDesktop = screenSize.width >= 1024;
     
-    // Responsive font sizes for logo - slightly bigger
-    double logoFontSize;
-    if (isDesktop) {
-      logoFontSize = 56;
-    } else if (isTablet) {
-      logoFontSize = 48;
-    } else {
-      logoFontSize = 40;
-    }
+    // Responsive font sizes - smaller than home page
+    final fontSize = isSmallMobile ? 24.0 : isMobile ? 28.0 : isLargeMobile ? 32.0 : isTablet ? 36.0 : 40.0;
+    
+    final letterSpacing = isSmallMobile ? 1.5 : isMobile ? 2.0 : isLargeMobile ? 2.5 : isTablet ? 3.0 : 3.5;
+    
+    final lineWidth = isSmallMobile ? 70.0 : isMobile ? 80.0 : isLargeMobile ? 90.0 : isTablet ? 100.0 : 110.0;
+    
+    final lineHeight = isSmallMobile ? 2.0 : isMobile ? 2.5 : isLargeMobile ? 3.0 : isTablet ? 3.5 : 4.0;
     
     return Scaffold(
       body: Container(
@@ -126,41 +128,56 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                          ).createShader(bounds),
-                          child: Text(
-                            'Sliding Number',
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.visible,
-                            maxLines: 1,
-                            style: GoogleFonts.inter(
-                              fontSize: logoFontSize,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 0.8,
-                              shadows: [
-                                Shadow(
-                                  color: AppColors.logoGradientStart.withValues(alpha: 0.5),
-                                  offset: const Offset(0, 0),
-                                  blurRadius: 20,
-                                ),
+                        // Main title text - matching home page exactly, always single line
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.logoGradientStart,
+                                AppColors.logoGradientMid,
+                                AppColors.logoGradientEnd,
                               ],
+                              stops: [0.0, 0.5, 1.0],
+                            ).createShader(bounds),
+                            child: Text(
+                              'SLIDING NUMBER',
+                              style: GoogleFonts.orbitron(
+                                fontSize: fontSize,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: letterSpacing,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.8),
+                                    offset: const Offset(2, 2),
+                                    blurRadius: 6,
+                                  ),
+                                  Shadow(
+                                    color: AppColors.primaryGold.withValues(alpha: 0.5),
+                                    offset: const Offset(0, 0),
+                                    blurRadius: 15,
+                                  ),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Container(
-                            height: 3,
-                            width: 90,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                              ),
-                              borderRadius: BorderRadius.circular(2),
+                        SizedBox(height: isSmallMobile ? 10.0 : isMobile ? 12.0 : isLargeMobile ? 14.0 : isTablet ? 16.0 : 18.0),
+                        // Line below logo - matching home page
+                        Container(
+                          height: lineHeight,
+                          width: lineWidth,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
                             ),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ],

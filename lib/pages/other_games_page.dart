@@ -174,44 +174,31 @@ class _OtherGamesPageState extends State<OtherGamesPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          Container(
-            decoration: AppTheme.backgroundGradient,
-            child: SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Stack(
+      body: Container(
+        decoration: AppTheme.backgroundGradient,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    _buildAnimatedBackground(),
+                    Column(
                       children: [
-                        _buildAnimatedBackground(),
-                        Column(
-                          children: [
-                            _buildHeader(context),
-                            Expanded(
-                              child: _buildGamesGrid(context),
-                            ),
-                          ],
+                        _buildHeader(context),
+                        Expanded(
+                          child: _buildGamesGrid(context),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+              // Ad banner at the bottom - independent from other elements
+              const AdBanner(),
+            ],
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              top: false,
-              child: const AdBanner(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
