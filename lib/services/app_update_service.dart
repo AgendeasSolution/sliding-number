@@ -106,7 +106,7 @@ class AppUpdateService {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching Play Store version: $e');
+      // Silent error - failures should never interrupt the user experience
     }
     return null;
   }
@@ -137,7 +137,7 @@ class AppUpdateService {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching App Store version: $e');
+      // Silent error - failures should never interrupt the user experience
     }
     return null;
   }
@@ -214,7 +214,7 @@ class AppUpdateService {
         await launchUrl(storeUrl, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      debugPrint('Error launching store page: $e');
+      // Silent error - failures should never interrupt the user experience
     }
   }
 
