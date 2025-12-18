@@ -290,13 +290,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildHeader(BuildContext context) {
-    // Responsive font sizes for all screen sizes - smaller logo
+    // Responsive font sizes for all screen sizes - slightly smaller logo to keep on one line
     final fontSize = _getResponsiveValue(context,
-      smallMobile: 28.0,
-      mobile: 32.0,
-      largeMobile: 36.0,
-      tablet: 40.0,
-      desktop: 44.0,
+      smallMobile: 24.0,
+      mobile: 28.0,
+      largeMobile: 32.0,
+      tablet: 36.0,
+      desktop: 40.0,
     );
     
     final letterSpacing = _getResponsiveValue(context,
@@ -336,38 +336,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Column(
         children: [
           // Main title text - matching splash screen
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.logoGradientStart,
-                AppColors.logoGradientMid,
-                AppColors.logoGradientEnd,
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ).createShader(bounds),
-            child: Text(
-              'SLIDING NUMBER',
-              style: GoogleFonts.orbitron(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: letterSpacing,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.8),
-                    offset: const Offset(2, 2),
-                    blurRadius: 6,
-                  ),
-                  Shadow(
-                    color: AppColors.primaryGold.withValues(alpha: 0.5),
-                    offset: const Offset(0, 0),
-                    blurRadius: 15,
-                  ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.logoGradientStart,
+                  AppColors.logoGradientMid,
+                  AppColors.logoGradientEnd,
                 ],
+                stops: [0.0, 0.5, 1.0],
+              ).createShader(bounds),
+              child: Text(
+                'SLIDING NUMBER',
+                style: GoogleFonts.orbitron(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: letterSpacing,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.8),
+                      offset: const Offset(2, 2),
+                      blurRadius: 6,
+                    ),
+                    Shadow(
+                      color: AppColors.primaryGold.withValues(alpha: 0.5),
+                      offset: const Offset(0, 0),
+                      blurRadius: 15,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
           SizedBox(height: _getResponsiveValue(context,
@@ -816,26 +822,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     try {
       if (await canLaunchUrl(uri)) {
+        if (!context.mounted) return;
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open web games link'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error opening web games: $e'),
+          const SnackBar(
+            content: Text('Could not open web games link'),
             backgroundColor: AppColors.error,
           ),
         );
       }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error opening web games: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -1235,7 +1240,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _lastOpenedLevel = level;
       });
     }
-    
+
+    // Ensure the context is still valid after the async call above
+    if (!context.mounted) return;
+
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => GamePage(initialLevel: level),
@@ -1442,11 +1450,11 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: AppColors.primaryGold,
+                              color: AppColors.infoLight,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primaryGold.withValues(alpha: 0.6),
+                                  color: AppColors.infoLight.withValues(alpha: 0.7),
                                   blurRadius: 4,
                                   spreadRadius: 1,
                                 ),

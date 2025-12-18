@@ -114,8 +114,8 @@ class OneSignalService {
     }
 
     try {
-      final permission = await OneSignal.Notifications.permission;
-      return permission ?? false;
+      final permission = OneSignal.Notifications.permission;
+      return permission;
     } catch (e) {
       return false;
     }
@@ -197,7 +197,7 @@ class OneSignalService {
 
     try {
       final permission = await OneSignal.Notifications.requestPermission(true);
-      return permission ?? false;
+      return permission;
     } catch (e) {
       return false;
     }
