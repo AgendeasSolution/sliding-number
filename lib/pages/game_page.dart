@@ -591,8 +591,6 @@ class _GamePageState extends State<GamePage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildSwipeButtons(),
-                        const SizedBox(height: 12), // Gap between buttons and game board
                         GameBoard(
                           gameState: _gameState!,
                           onTileTap: _moveTile,
@@ -625,7 +623,7 @@ class _GamePageState extends State<GamePage> {
         children: [
           _buildExitButton(),
           _buildLevelDisplay(),
-          _buildResetButton(),
+          _buildGoalButtonHeader(),
         ],
       ),
     );
@@ -683,19 +681,19 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  Widget _buildResetButton() {
+  Widget _buildGoalButtonHeader() {
     return SizedBox(
       width: 40,
       height: 40,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.warning, AppColors.warningDark],
+            colors: [AppColors.success, AppColors.successDark],
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: AppColors.warning.withValues(alpha: 0.3),
+              color: AppColors.success.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -704,7 +702,7 @@ class _GamePageState extends State<GamePage> {
         child: ElevatedButton(
           onPressed: () {
             AudioService.instance.playClickSound();
-            _resetToInitialState();
+            _showGoalModal();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
@@ -715,7 +713,7 @@ class _GamePageState extends State<GamePage> {
             ),
           ),
           child: const Icon(
-            Icons.refresh,
+            Icons.flag,
             color: AppColors.textWhite,
             size: 18,
           ),
@@ -771,6 +769,89 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
+  Widget _buildUnifiedButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color color,
+    bool isEnabled = true,
+    bool showWatchAd = false,
+  }) {
+    final bool isDisabled = !isEnabled;
+    
+    return Opacity(
+      opacity: isDisabled ? 0.5 : 1.0,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isDisabled ? AppColors.neutralDark : color,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isDisabled
+              ? []
+              : [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: ElevatedButton(
+          onPressed: isDisabled ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: SizedBox(
+            height: 80, // Reduced height for all buttons
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon at the top (without square container)
+                Icon(
+                  icon,
+                  color: Colors.black,
+                  size: 20,
+                ),
+                const SizedBox(height: 4),
+                // Button name below icon - allow wrapping
+                Flexible(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 11,
+                    ),
+                    overflow: TextOverflow.visible,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    softWrap: true,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // Watch Ad text below button name
+                Text(
+                  showWatchAd && isEnabled ? 'Watch Ad' : '',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: Colors.black.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w500,
+                    height: 1.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSwipeButton({
     required IconData icon,
     required String label,
@@ -778,87 +859,14 @@ class _GamePageState extends State<GamePage> {
     required bool isEnabled,
     bool isActive = false,
   }) {
-    final bool isDisabled = !isEnabled;
-    
     return Expanded(
-      child: Opacity(
-        opacity: isDisabled ? 0.5 : 1.0,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: isDisabled
-                ? null
-                : (isActive
-                    ? LinearGradient(
-                        colors: [AppColors.primaryGold, AppColors.primaryGoldDark],
-                      )
-                    : const LinearGradient(
-                        colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-                      )),
-            color: isDisabled ? AppColors.neutralDark : null,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isDisabled
-                ? []
-                : [
-                    BoxShadow(
-                      color: (isActive ? AppColors.primaryGold : AppColors.logoGradientStart)
-                          .withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-          ),
-          child: ElevatedButton(
-            onPressed: isDisabled ? null : onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                      color: AppColors.textWhite,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        label,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textWhite,
-                          fontSize: 14,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isActive && isEnabled)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Watch Ad',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textWhite.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+      child: _buildUnifiedButton(
+        icon: icon,
+        label: label,
+        onPressed: onPressed,
+        color: isActive ? AppColors.logoGradientStart : AppColors.logoGradientStart,
+        isEnabled: isEnabled,
+        showWatchAd: !isActive && isEnabled,
       ),
     );
   }
@@ -893,14 +901,55 @@ class _GamePageState extends State<GamePage> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Shuffle button on the left
-          _buildShuffleButton(),
-          // Time display in the center
-          _buildTimeDisplay(),
-          // Goal button on the right
-          _buildGoalButton(),
+          // Shuffle button (left)
+          Expanded(
+            child: _buildUnifiedButton(
+              icon: Icons.shuffle,
+              label: 'Shuffle',
+              onPressed: () {
+                AudioService.instance.playClickSound();
+                _shuffleGame();
+              },
+              color: AppColors.logoGradientStart,
+              isEnabled: _gameState?.isGameActive ?? false,
+              showWatchAd: _gameState?.isGameActive ?? false,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Swipe Left button (center-left)
+          _buildSwipeButton(
+            icon: Icons.arrow_back,
+            label: _isLeftSwapMode ? 'Cancel' : 'Swipe Left',
+            onPressed: _onLeftSwipeButtonPressed,
+            isEnabled: _gameState?.isGameActive ?? false,
+            isActive: _isLeftSwapMode,
+          ),
+          const SizedBox(width: 8),
+          // Swipe Right button (center-right)
+          _buildSwipeButton(
+            icon: Icons.arrow_forward,
+            label: _isRightSwapMode ? 'Cancel' : 'Swipe Right',
+            onPressed: _onRightSwipeButtonPressed,
+            isEnabled: _gameState?.isGameActive ?? false,
+            isActive: _isRightSwapMode,
+          ),
+          const SizedBox(width: 8),
+          // Reset button (right)
+          Expanded(
+            child: _buildUnifiedButton(
+              icon: Icons.refresh,
+              label: 'Reset',
+              onPressed: () {
+                AudioService.instance.playClickSound();
+                _resetToInitialState();
+              },
+              color: AppColors.logoGradientStart,
+              isEnabled: _gameState?.isGameActive ?? false,
+              showWatchAd: _gameState?.isGameActive ?? false,
+            ),
+          ),
         ],
       ),
     );
@@ -944,31 +993,6 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  Widget _buildShuffleButton() {
-    return GameButton(
-      icon: Icons.shuffle,
-      onPressed: () {
-        AudioService.instance.playClickSound();
-        _shuffleGame();
-      }, // Watch ad to earn shuffle reward
-      gradient: const LinearGradient(
-        colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
-      ),
-    );
-  }
-
-  Widget _buildGoalButton() {
-    return GameButton(
-      icon: Icons.flag,
-      onPressed: () {
-        AudioService.instance.playClickSound();
-        _showGoalModal();
-      },
-      gradient: const LinearGradient(
-        colors: [AppColors.success, AppColors.successDark],
-      ),
-    );
-  }
 
   // --- Modals / Dialogs ---
 

@@ -45,28 +45,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     final int totalPages = (AppConstants.maxLevel / 9).ceil();
     _pageController = PageController();
-    _cardsAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-    _particleAnimationController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    );
-
-    _cardsAnimation = CurvedAnimation(
-      parent: _cardsAnimationController,
-      curve: Curves.easeOutBack,
-    );
-    _particleAnimation = CurvedAnimation(
-      parent: _particleAnimationController,
-      curve: Curves.linear,
-    );
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _cardsAnimationController.forward();
-    });
-    _particleAnimationController.repeat();
+    // Animations disabled
     
     // Defer heavy operations to prevent blocking UI rendering
     // Use microtask to ensure UI is rendered first, then run background tasks
@@ -102,8 +81,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _pageController.dispose();
-    _cardsAnimationController.dispose();
-    _particleAnimationController.dispose();
     super.dispose();
   }
 
@@ -296,15 +273,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildAnimatedBackground() {
-    return AnimatedBuilder(
-      animation: _particleAnimation,
-      builder: (context, child) {
-        return CustomPaint(
-          painter: ParticlePainter(_particleAnimation.value),
-          size: Size.infinite,
-        );
-      },
-    );
+    // Animation disabled - return empty container
+    return const SizedBox.shrink();
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -493,11 +463,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               totalPages,
               (index) => GestureDetector(
                 onTap: () {
-                  _pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
+                  _pageController.jumpToPage(index);
                 },
                 child: Container(
                   width: 8.0,
@@ -1256,64 +1222,26 @@ class _LevelCard extends StatefulWidget {
 }
 
 class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
-  late Animation<double> _hoverAnimation;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _hoverAnimation = CurvedAnimation(
-      parent: _hoverController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _hoverController.dispose();
-    super.dispose();
-  }
+  // Animations disabled
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.isUnlocked ? widget.onTap : null,
-      onTapDown: widget.isUnlocked ? (_) {
-        setState(() => _isHovered = true);
-        _hoverController.forward();
-      } : null,
-      onTapUp: widget.isUnlocked ? (_) {
-        setState(() => _isHovered = false);
-        _hoverController.reverse();
-      } : null,
-      onTapCancel: widget.isUnlocked ? () {
-        setState(() => _isHovered = false);
-        _hoverController.reverse();
-      } : null,
-      child: AnimatedBuilder(
-        animation: _hoverAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: widget.isUnlocked ? 1.0 + (_hoverAnimation.value * 0.05) : 1.0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: _getCardGradient(),
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: _getCardBorderColor(),
-                  width: 1.5 + (_hoverAnimation.value * 0.5),
-                ),
-                boxShadow: _getCardShadows(),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: _getCardGradient(),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: _getCardBorderColor(),
+            width: 1.5,
+          ),
+          boxShadow: _getCardShadows(),
+        ),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -1336,7 +1264,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                               '${widget.level}',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 22 + (_hoverAnimation.value * 2),
+                                fontSize: 22,
                                 fontWeight: FontWeight.w900,
                                 color: _getLevelNumberColor(),
                                 shadows: _getLevelNumberShadows(),
@@ -1357,7 +1285,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                                   borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
                                     color: _getIconContainerBorderColor(),
-                                    width: 1.5 + (_hoverAnimation.value * 0.5),
+                                    width: 1.5,
                                   ),
                                   boxShadow: _getIconContainerShadows(),
                                 ),
@@ -1365,7 +1293,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                                   child: Icon(
                                     Icons.check_circle,
                                     color: Colors.white,
-                                    size: widget.iconSize * 0.5 + (_hoverAnimation.value * 2),
+                                    size: widget.iconSize * 0.5,
                                   ),
                                 ),
                               ),
@@ -1385,7 +1313,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                                   borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
                                     color: _getIconContainerBorderColor(),
-                                    width: 1.5 + (_hoverAnimation.value * 0.5),
+                                    width: 1.5,
                                   ),
                                   boxShadow: _getIconContainerShadows(),
                                 ),
@@ -1393,7 +1321,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                                   child: Icon(
                                     Icons.lock,
                                     color: Colors.grey.shade400,
-                                    size: widget.iconSize * 0.5 + (_hoverAnimation.value * 2),
+                                    size: widget.iconSize * 0.5,
                                   ),
                                 ),
                               ),
@@ -1407,8 +1335,8 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                           top: widget.cardPadding + 2,
                           right: widget.cardPadding + 2,
                           child: Container(
-                            width: 8 + (_hoverAnimation.value * 1),
-                            height: 8 + (_hoverAnimation.value * 1),
+                            width: 8,
+                            height: 8,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
@@ -1427,9 +1355,6 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
                 ),
               ),
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -1456,9 +1381,9 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getCardBorderColor() {
     if (widget.isCompleted) {
-      return Colors.white.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.3);
     } else if (widget.isUnlocked) {
-      return Colors.white.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.3);
     } else {
       return Colors.grey.withValues(alpha: 0.5);
     }
@@ -1469,15 +1394,15 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
       return [
         // Main glow shadow with green color
         BoxShadow(
-          color: AppColors.success.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 12 + (_hoverAnimation.value * 4),
+          color: AppColors.success.withValues(alpha: 0.3),
+          blurRadius: 12,
           offset: const Offset(0, 5),
-          spreadRadius: 2 + (_hoverAnimation.value * 1),
+          spreadRadius: 2,
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 8 + (_hoverAnimation.value * 2),
+          color: Colors.black.withValues(alpha: 0.2),
+          blurRadius: 8,
           offset: const Offset(0, 3),
         ),
       ];
@@ -1485,15 +1410,15 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
       return [
         // Main glow shadow with blue color
         BoxShadow(
-          color: AppColors.info.withValues(alpha: 0.3 + (_hoverAnimation.value * 0.1)),
-          blurRadius: 12 + (_hoverAnimation.value * 4),
+          color: AppColors.info.withValues(alpha: 0.3),
+          blurRadius: 12,
           offset: const Offset(0, 5),
-          spreadRadius: 2 + (_hoverAnimation.value * 1),
+          spreadRadius: 2,
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 8 + (_hoverAnimation.value * 2),
+          color: Colors.black.withValues(alpha: 0.2),
+          blurRadius: 8,
           offset: const Offset(0, 3),
         ),
       ];
@@ -1531,12 +1456,12 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
         Shadow(
           color: Colors.black87,
           offset: const Offset(1, 1),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          blurRadius: 4,
         ),
         Shadow(
           color: Colors.white24,
           offset: const Offset(-1, -1),
-          blurRadius: 2 + (_hoverAnimation.value * 1),
+          blurRadius: 2,
         ),
       ];
     } else if (widget.isUnlocked) {
@@ -1544,12 +1469,12 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
         Shadow(
           color: Colors.black87,
           offset: const Offset(1, 1),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          blurRadius: 4,
         ),
         Shadow(
           color: Colors.white24,
           offset: const Offset(-1, -1),
-          blurRadius: 2 + (_hoverAnimation.value * 1),
+          blurRadius: 2,
         ),
       ];
     } else {
@@ -1566,13 +1491,13 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
   List<Color> _getIconContainerGradient() {
     if (widget.isCompleted) {
       return [
-        Colors.white.withValues(alpha: 0.25 + (_hoverAnimation.value * 0.1)),
-        Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+        Colors.white.withValues(alpha: 0.25),
+        Colors.white.withValues(alpha: 0.1),
       ];
     } else if (widget.isUnlocked) {
       return [
-        Colors.white.withValues(alpha: 0.25 + (_hoverAnimation.value * 0.1)),
-        Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
+        Colors.white.withValues(alpha: 0.25),
+        Colors.white.withValues(alpha: 0.1),
       ];
     } else {
       return [
@@ -1584,9 +1509,9 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getIconContainerBorderColor() {
     if (widget.isCompleted) {
-      return Colors.white.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.4);
     } else if (widget.isUnlocked) {
-      return Colors.white.withValues(alpha: 0.4 + (_hoverAnimation.value * 0.2));
+      return Colors.white.withValues(alpha: 0.4);
     } else {
       return Colors.grey.withValues(alpha: 0.3);
     }
@@ -1596,26 +1521,26 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
     if (widget.isCompleted) {
       return [
         BoxShadow(
-          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          color: Colors.white.withValues(alpha: 0.1),
+          blurRadius: 4,
           offset: const Offset(0, 1),
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 4,
           offset: const Offset(0, -1),
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
         BoxShadow(
-          color: Colors.white.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          color: Colors.white.withValues(alpha: 0.1),
+          blurRadius: 4,
           offset: const Offset(0, 1),
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.1 + (_hoverAnimation.value * 0.05)),
-          blurRadius: 4 + (_hoverAnimation.value * 2),
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 4,
           offset: const Offset(0, -1),
         ),
       ];
@@ -1642,9 +1567,9 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getStatusTextColor() {
     if (widget.isCompleted) {
-      return AppColors.completedAccent.withValues(alpha: 0.9 + (_hoverAnimation.value * 0.1));
+      return AppColors.completedAccent.withValues(alpha: 0.9);
     } else if (widget.isUnlocked) {
-      return Colors.white.withValues(alpha: 0.9 + (_hoverAnimation.value * 0.1));
+      return Colors.white.withValues(alpha: 0.9);
     } else {
       return Colors.grey.shade400;
     }
@@ -1656,7 +1581,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
         Shadow(
           color: Colors.black87,
           offset: const Offset(0.5, 0.5),
-          blurRadius: 1 + (_hoverAnimation.value * 0.5),
+          blurRadius: 1,
         ),
       ];
     } else if (widget.isUnlocked) {
@@ -1664,7 +1589,7 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
         Shadow(
           color: Colors.black87,
           offset: const Offset(0.5, 0.5),
-          blurRadius: 1 + (_hoverAnimation.value * 0.5),
+          blurRadius: 1,
         ),
       ];
     } else {
