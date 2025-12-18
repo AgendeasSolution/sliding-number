@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
@@ -203,11 +204,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           SizedBox(height: _getResponsiveValue(context,
-                            smallMobile: 20.0,
-                            mobile: 28.0,
-                            largeMobile: 36.0,
-                            tablet: 44.0,
-                            desktop: 52.0,
+                            smallMobile: 32.0,
+                            mobile: 40.0,
+                            largeMobile: 48.0,
+                            tablet: 56.0,
+                            desktop: 64.0,
                           )),
                           _buildHeader(context),
                           SizedBox(height: _getResponsiveValue(context,
@@ -278,37 +279,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildHeader(BuildContext context) {
-    // Responsive font sizes for all screen sizes
+    // Responsive font sizes for all screen sizes - smaller logo
     final fontSize = _getResponsiveValue(context,
-      smallMobile: 32.0,
-      mobile: 36.0,
-      largeMobile: 42.0,
-      tablet: 48.0,
-      desktop: 56.0,
+      smallMobile: 28.0,
+      mobile: 32.0,
+      largeMobile: 36.0,
+      tablet: 40.0,
+      desktop: 44.0,
     );
     
     final letterSpacing = _getResponsiveValue(context,
-      smallMobile: 0.5,
-      mobile: 0.8,
-      largeMobile: 1.0,
-      tablet: 1.2,
-      desktop: 1.5,
-    );
-    
-    final lineWidth = _getResponsiveValue(context,
-      smallMobile: 60.0,
-      mobile: 70.0,
-      largeMobile: 80.0,
-      tablet: 90.0,
-      desktop: 100.0,
-    );
-    
-    final lineHeight = _getResponsiveValue(context,
-      smallMobile: 2.0,
-      mobile: 2.5,
-      largeMobile: 3.0,
-      tablet: 3.5,
-      desktop: 4.0,
+      smallMobile: 1.5,
+      mobile: 2.0,
+      largeMobile: 2.5,
+      tablet: 3.0,
+      desktop: 3.5,
     );
     
     final topMargin = _getResponsiveValue(context,
@@ -319,50 +304,75 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       desktop: 24.0,
     );
     
+    final lineWidth = _getResponsiveValue(context,
+      smallMobile: 70.0,
+      mobile: 80.0,
+      largeMobile: 90.0,
+      tablet: 100.0,
+      desktop: 110.0,
+    );
+    
+    final lineHeight = _getResponsiveValue(context,
+      smallMobile: 2.0,
+      mobile: 2.5,
+      largeMobile: 3.0,
+      tablet: 3.5,
+      desktop: 4.0,
+    );
+    
     return Container(
       margin: EdgeInsets.only(top: topMargin),
       child: Column(
         children: [
+          // Main title text - no background container
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
-              colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.logoGradientStart,
+                AppColors.logoGradientMid,
+                AppColors.logoGradientEnd,
+              ],
+              stops: [0.0, 0.5, 1.0],
             ).createShader(bounds),
             child: Text(
-              'Sliding Number',
-              style: GoogleFonts.inter(
+              'SLIDING NUMBER',
+              style: GoogleFonts.orbitron(
                 fontSize: fontSize,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
                 color: Colors.white,
                 letterSpacing: letterSpacing,
                 shadows: [
                   Shadow(
-                    color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
+                    color: Colors.black.withValues(alpha: 0.8),
+                    offset: const Offset(2, 2),
+                    blurRadius: 6,
+                  ),
+                  Shadow(
+                    color: AppColors.primaryGold.withValues(alpha: 0.5),
                     offset: const Offset(0, 0),
-                    blurRadius: _getResponsiveValue(context,
-                      smallMobile: 15.0,
-                      mobile: 20.0,
-                      largeMobile: 25.0,
-                      tablet: 30.0,
-                      desktop: 35.0,
-                    ),
+                    blurRadius: 15,
                   ),
                 ],
               ),
+              textAlign: TextAlign.center,
             ),
           ),
           SizedBox(height: _getResponsiveValue(context,
-            smallMobile: 4.0,
-            mobile: 6.0,
-            largeMobile: 8.0,
-            tablet: 10.0,
-            desktop: 12.0,
+            smallMobile: 8.0,
+            mobile: 10.0,
+            largeMobile: 12.0,
+            tablet: 14.0,
+            desktop: 16.0,
           )),
+          // Line below logo - matching splash screen
           Container(
             height: lineHeight,
             width: lineWidth,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+                colors: [AppColors.logoGradientStart, AppColors.logoGradientEnd],
               ),
               borderRadius: BorderRadius.circular(2),
             ),
@@ -409,7 +419,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         LayoutBuilder(
           builder: (context, constraints) {
             // Calculate the height needed for 3 rows
-            final availableWidth = constraints.maxWidth - 16.0; // Account for padding
+            final availableWidth = constraints.maxWidth;
             final itemWidth = (availableWidth - (crossAxisSpacing * 2)) / 3;
             final itemHeight = itemWidth / childAspectRatio;
             final gridHeight = (itemHeight * 3) + (mainAxisSpacing * 2);
@@ -425,28 +435,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 },
                 itemCount: totalPages,
                 itemBuilder: (context, pageIndex) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3, // Fixed 3 columns
-                        crossAxisSpacing: crossAxisSpacing,
-                        mainAxisSpacing: mainAxisSpacing,
-                        childAspectRatio: childAspectRatio,
-                      ),
-                      itemCount: itemsPerPage,
-                      itemBuilder: (context, gridIndex) {
-                        final levelIndex = (pageIndex * itemsPerPage) + gridIndex;
-                        if (levelIndex >= AppConstants.maxLevel) {
-                          // Empty slot for last page if not full
-                          return const SizedBox.shrink();
-                        }
-                        final level = levelIndex + 1;
-                        final gridDimensions = GameUtils.calculateGridSize(level);
-                        return _buildLevelCard(context, level, gridDimensions.rows, gridDimensions.columns, levelIndex);
-                      },
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, // Fixed 3 columns
+                      crossAxisSpacing: crossAxisSpacing,
+                      mainAxisSpacing: mainAxisSpacing,
+                      childAspectRatio: childAspectRatio,
                     ),
+                    itemCount: itemsPerPage,
+                    itemBuilder: (context, gridIndex) {
+                      final levelIndex = (pageIndex * itemsPerPage) + gridIndex;
+                      if (levelIndex >= AppConstants.maxLevel) {
+                        // Empty slot for last page if not full
+                        return const SizedBox.shrink();
+                      }
+                      final level = levelIndex + 1;
+                      final gridDimensions = GameUtils.calculateGridSize(level);
+                      return _buildLevelCard(context, level, gridDimensions.rows, gridDimensions.columns, levelIndex);
+                    },
                   );
                 },
               ),
@@ -456,96 +464,163 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         // Page indicators with gap from carousel
         if (totalPages > 1)
           Padding(
-            padding: const EdgeInsets.only(top: 12.0),
+            padding: const EdgeInsets.only(top: 16.0),
             child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              totalPages,
-              (index) => GestureDetector(
-                onTap: () {
-                  _pageController.jumpToPage(index);
-                },
-                child: Container(
-                  width: 8.0,
-                  height: 8.0,
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentPageIndex == index
-                        ? AppColors.primaryGold
-                        : AppColors.primaryGold.withValues(alpha: 0.3),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                totalPages,
+                (index) => GestureDetector(
+                  onTap: () {
+                    _pageController.jumpToPage(index);
+                  },
+                  child: Container(
+                    width: _currentPageIndex == index ? 24.0 : 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: _currentPageIndex == index
+                          ? const LinearGradient(
+                              colors: [
+                                AppColors.primaryGold,
+                                AppColors.primaryGoldDark,
+                              ],
+                            )
+                          : null,
+                      color: _currentPageIndex == index
+                          ? null
+                          : AppColors.primaryGold.withValues(alpha: 0.3),
+                      boxShadow: _currentPageIndex == index
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primaryGold.withValues(alpha: 0.6),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           ),
       ],
     );
   }
 
   Widget _buildHowToPlayButton(BuildContext context) {
+    final buttonSize = _getResponsiveValue(context,
+      smallMobile: 38.0,
+      mobile: 42.0,
+      largeMobile: 46.0,
+      tablet: 50.0,
+      desktop: 54.0,
+    );
+    
     return GestureDetector(
       onTap: () {
         AudioService.instance.playClickSound();
         _showHowToPlayModal(context);
       },
       child: Container(
-        width: _getResponsiveValue(context,
-          smallMobile: 36.0,
-          mobile: 40.0,
-          largeMobile: 44.0,
-          tablet: 48.0,
-          desktop: 52.0,
-        ),
-        height: _getResponsiveValue(context,
-          smallMobile: 36.0,
-          mobile: 40.0,
-          largeMobile: 44.0,
-          tablet: 48.0,
-          desktop: 52.0,
-        ),
+        width: buttonSize,
+        height: buttonSize,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.neutral, AppColors.neutralDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF2A2F4D),
+              Color(0xFF1A1F3A),
+            ],
           ),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(14.0),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
-            width: 1.0,
+            color: AppColors.primaryGold.withValues(alpha: 0.4),
+            width: 2.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: AppColors.primaryGold.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Icon(
-          Icons.help_outline,
-          color: Colors.white,
-          size: _getResponsiveValue(context,
-            smallMobile: 20.0,
-            mobile: 22.0,
-            largeMobile: 24.0,
-            tablet: 26.0,
-            desktop: 28.0,
-          ),
+          Icons.help_outline_rounded,
+          color: AppColors.primaryGold,
+          size: buttonSize * 0.6,
         ),
       ),
     );
   }
 
   Widget _buildSoundButton(BuildContext context) {
-    return SoundToggleButton(
-      size: _getResponsiveValue(context,
-        smallMobile: 36.0,
-        mobile: 40.0,
-        largeMobile: 44.0,
-        tablet: 48.0,
-        desktop: 52.0,
-      ),
+    final buttonSize = _getResponsiveValue(context,
+      smallMobile: 38.0,
+      mobile: 42.0,
+      largeMobile: 46.0,
+      tablet: 50.0,
+      desktop: 54.0,
+    );
+    
+    return StreamBuilder<bool>(
+      stream: Stream.periodic(const Duration(milliseconds: 100))
+          .map((_) => AudioService.instance.isSoundEnabled),
+      builder: (context, snapshot) {
+        final isSoundEnabled = snapshot.data ?? AudioService.instance.isSoundEnabled;
+        return GestureDetector(
+          onTap: () async {
+            await AudioService.instance.toggleSound();
+            AudioService.instance.playClickSound();
+          },
+          child: Container(
+            width: buttonSize,
+            height: buttonSize,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF2A2F4D),
+                  Color(0xFF1A1F3A),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(14.0),
+              border: Border.all(
+                color: AppColors.primaryGold.withValues(alpha: 0.4),
+                width: 2.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryGold.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              isSoundEnabled
+                  ? Icons.volume_up_rounded
+                  : Icons.volume_off_rounded,
+              color: AppColors.primaryGold,
+              size: buttonSize * 0.6,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -559,28 +634,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     
     final gamesButtonWidth = _getResponsiveValue(context,
-      smallMobile: 130.0,
-      mobile: 140.0,
-      largeMobile: 150.0,
-      tablet: 160.0,
-      desktop: 170.0,
+      smallMobile: 140.0,
+      mobile: 150.0,
+      largeMobile: 160.0,
+      tablet: 170.0,
+      desktop: 180.0,
     );
     
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: _getResponsiveValue(context,
-          smallMobile: 16.0,
-          mobile: 20.0,
-          largeMobile: 24.0,
-          tablet: 28.0,
-          desktop: 32.0,
+          smallMobile: 12.0,
+          mobile: 14.0,
+          largeMobile: 16.0,
+          tablet: 18.0,
+          desktop: 20.0,
         ),
         vertical: _getResponsiveValue(context,
-          smallMobile: 12.0,
-          mobile: 16.0,
-          largeMobile: 20.0,
-          tablet: 24.0,
-          desktop: 28.0,
+          smallMobile: 6.0,
+          mobile: 8.0,
+          largeMobile: 10.0,
+          tablet: 12.0,
+          desktop: 14.0,
         ),
       ),
       child: Column(
@@ -589,14 +664,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Center(
             child: ShaderMask(
               shaderCallback: (bounds) => const LinearGradient(
-                colors: [Color(0xFFE9AF51), Color(0xFFD4A046)],
+                colors: [
+                  AppColors.primaryGold,
+                  AppColors.primaryGoldLight,
+                  AppColors.primaryGold,
+                ],
+                stops: [0.0, 0.5, 1.0],
               ).createShader(bounds),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.info_outline_rounded,
+                    Icons.explore_rounded,
                     color: Colors.white,
                     size: _getResponsiveValue(context,
                       smallMobile: 18.0,
@@ -615,7 +695,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   )),
                   Text(
                     'Explore More Games',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.orbitron(
                       fontSize: _getResponsiveValue(context,
                         smallMobile: 12.0,
                         mobile: 14.0,
@@ -623,17 +703,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         tablet: 18.0,
                         desktop: 20.0,
                       ),
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
-                      letterSpacing: 0.8,
+                      letterSpacing: 1.2,
                       shadows: [
                         Shadow(
-                          color: const Color(0xFFE9AF51).withValues(alpha: 0.5),
+                          color: AppColors.primaryGold.withValues(alpha: 0.6),
                           offset: const Offset(0, 2),
-                          blurRadius: 8,
+                          blurRadius: 10,
                         ),
                         Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color: Colors.black.withValues(alpha: 0.5),
                           offset: const Offset(0, 1),
                           blurRadius: 4,
                         ),
@@ -646,17 +726,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
           SizedBox(height: _getResponsiveValue(context,
-            smallMobile: 8.0,
-            mobile: 10.0,
-            largeMobile: 12.0,
-            tablet: 14.0,
-            desktop: 16.0,
+            smallMobile: 6.0,
+            mobile: 8.0,
+            largeMobile: 10.0,
+            tablet: 12.0,
+            desktop: 14.0,
           )),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: gamesButtonWidth,
+              Expanded(
                 child: _buildGameButton(
                   context,
                   label: 'Mobile Games',
@@ -675,8 +753,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
               SizedBox(width: buttonSpacing),
-              SizedBox(
-                width: gamesButtonWidth,
+              Expanded(
                 child: _buildGameButton(
                   context,
                   label: 'Web Games',
@@ -875,44 +952,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     required IconData icon,
   }) {
     return Container(
-            decoration: BoxDecoration(
-              gradient: gradient,
-              borderRadius: BorderRadius.circular(_getResponsiveValue(context,
-                smallMobile: 10.0,
-                mobile: 12.0,
-                largeMobile: 14.0,
-                tablet: 16.0,
-                desktop: 18.0,
-              )),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: gradient.colors.first.withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                  spreadRadius: 2,
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onPressed,
-                borderRadius: BorderRadius.circular(_getResponsiveValue(context,
-                  smallMobile: 10.0,
-                  mobile: 12.0,
-                  largeMobile: 14.0,
-                  tablet: 16.0,
-                  desktop: 18.0,
-                )),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+          smallMobile: 14.0,
+          mobile: 16.0,
+          largeMobile: 18.0,
+          tablet: 20.0,
+          desktop: 22.0,
+        )),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.4),
+          width: 2.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withValues(alpha: 0.5),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: gradient.colors.first.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 1,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(_getResponsiveValue(context,
+            smallMobile: 14.0,
+            mobile: 16.0,
+            largeMobile: 18.0,
+            tablet: 20.0,
+            desktop: 22.0,
+          )),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                     vertical: _getResponsiveValue(context,
@@ -930,61 +1013,61 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       desktop: 18.0,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        icon,
-                        size: _getResponsiveValue(context,
-                          smallMobile: 20.0,
-                          mobile: 22.0,
-                          largeMobile: 24.0,
-                          tablet: 26.0,
-                          desktop: 28.0,
-                        ),
-                        color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: _getResponsiveValue(context,
+                    smallMobile: 22.0,
+                    mobile: 24.0,
+                    largeMobile: 26.0,
+                    tablet: 28.0,
+                    desktop: 30.0,
+                  ),
+                  color: Colors.white,
+                ),
+                SizedBox(width: _getResponsiveValue(context,
+                  smallMobile: 6.0,
+                  mobile: 8.0,
+                  largeMobile: 10.0,
+                  tablet: 12.0,
+                  desktop: 14.0,
+                )),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.orbitron(
+                      fontSize: _getResponsiveValue(context,
+                        smallMobile: 12.0,
+                        mobile: 14.0,
+                        largeMobile: 16.0,
+                        tablet: 18.0,
+                        desktop: 20.0,
                       ),
-                      SizedBox(width: _getResponsiveValue(context,
-                        smallMobile: 4.0,
-                        mobile: 6.0,
-                        largeMobile: 8.0,
-                        tablet: 10.0,
-                        desktop: 12.0,
-                      )),
-                      Flexible(
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: _getResponsiveValue(context,
-                              smallMobile: 13.0,
-                              mobile: 15.0,
-                              largeMobile: 17.0,
-                              tablet: 19.0,
-                              desktop: 21.0,
-                            ),
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.3,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                offset: const Offset(0, 1),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.7),
+                          offset: const Offset(2, 2),
+                          blurRadius: 4,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
+              ],
             ),
-          );
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildLevelCard(BuildContext context, int level, int rows, int columns, int index) {
@@ -1235,126 +1318,120 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: _getCardBorderColor(),
-            width: 1.5,
+            width: 2.0,
           ),
-          boxShadow: _getCardShadows(),
         ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.isUnlocked ? widget.onTap : null,
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.isUnlocked ? widget.onTap : null,
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                // Main content - centered
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  padding: EdgeInsets.all(widget.cardPadding),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Main content - centered
+                      // Level number with enhanced styling
                       Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        padding: EdgeInsets.all(widget.cardPadding),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Level number - always shown, centered
-                            Text(
-                              '${widget.level}',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: _getLevelNumberColor(),
-                                shadows: _getLevelNumberShadows(),
-                              ),
-                            ),
-                            // Checkmark icon for completed levels
-                            if (widget.isCompleted) ...[
-                              SizedBox(height: widget.checkmarkSpacing),
-                              Container(
-                                width: widget.iconSize,
-                                height: widget.iconSize,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: _getIconContainerGradient(),
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: _getIconContainerBorderColor(),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: _getIconContainerShadows(),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Colors.white,
-                                    size: widget.iconSize * 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            // Lock icon in circle - only for locked levels
-                            if (!widget.isUnlocked) ...[
-                              SizedBox(height: widget.checkmarkSpacing),
-                              Container(
-                                width: widget.iconSize,
-                                height: widget.iconSize,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: _getIconContainerGradient(),
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: _getIconContainerBorderColor(),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: _getIconContainerShadows(),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.lock,
-                                    color: Colors.grey.shade400,
-                                    size: widget.iconSize * 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          '${widget.level}',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.orbitron(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: _getLevelNumberColor(),
+                            shadows: _getLevelNumberShadows(),
+                            letterSpacing: 1.0,
+                          ),
                         ),
                       ),
-                      // Dot at top-right corner for open/unlocked levels
-                      if (widget.isUnlocked && !widget.isCompleted)
-                        Positioned(
-                          top: widget.cardPadding + 2,
-                          right: widget.cardPadding + 2,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
+                      // Checkmark icon for completed levels
+                      if (widget.isCompleted) ...[
+                        SizedBox(height: widget.checkmarkSpacing + 4),
+                        Container(
+                          width: widget.iconSize + 4,
+                          height: widget.iconSize + 4,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0.4),
+                                Colors.white.withValues(alpha: 0.2),
                               ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle,
+                              color: Colors.white,
+                              size: widget.iconSize * 0.6,
                             ),
                           ),
                         ),
+                      ],
+                      // Lock icon in circle - only for locked levels
+                      if (!widget.isUnlocked) ...[
+                        SizedBox(height: widget.checkmarkSpacing + 4),
+                        Container(
+                          width: widget.iconSize + 4,
+                          height: widget.iconSize + 4,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.grey.withValues(alpha: 0.3),
+                                Colors.grey.withValues(alpha: 0.1),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.grey.withValues(alpha: 0.4),
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.lock,
+                              color: Colors.grey.shade300,
+                              size: widget.iconSize * 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1369,11 +1446,17 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   List<Color> _getCardGradient() {
     if (widget.isCompleted) {
-      // Green gradient for completed/solved levels
-      return [AppColors.success, AppColors.successDark];
+      // Vibrant emerald gradient for completed levels
+      return [
+        AppColors.completed,
+        AppColors.completedDark,
+      ];
     } else if (widget.isUnlocked) {
-      // Blue gradient for open/unlocked levels
-      return [AppColors.info, AppColors.infoDark];
+      // Bright cyan/blue gradient for unlocked levels
+      return [
+        AppColors.info,
+        AppColors.infoDark,
+      ];
     } else {
       return _getLockedGradient();
     }
@@ -1381,59 +1464,71 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
 
   Color _getCardBorderColor() {
     if (widget.isCompleted) {
-      return Colors.white.withValues(alpha: 0.3);
+      return Colors.white.withValues(alpha: 0.5);
     } else if (widget.isUnlocked) {
-      return Colors.white.withValues(alpha: 0.3);
+      return Colors.white.withValues(alpha: 0.4);
     } else {
-      return Colors.grey.withValues(alpha: 0.5);
+      return Colors.grey.withValues(alpha: 0.3);
     }
   }
 
   List<BoxShadow> _getCardShadows() {
     if (widget.isCompleted) {
       return [
-        // Main glow shadow with green color
+        // Strong glow shadow with emerald color
         BoxShadow(
-          color: AppColors.success.withValues(alpha: 0.3),
-          blurRadius: 12,
-          offset: const Offset(0, 5),
+          color: AppColors.completed.withValues(alpha: 0.6),
+          blurRadius: 20,
+          offset: const Offset(0, 6),
+          spreadRadius: 4,
+        ),
+        BoxShadow(
+          color: AppColors.completed.withValues(alpha: 0.4),
+          blurRadius: 30,
+          offset: const Offset(0, 8),
           spreadRadius: 2,
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
+          color: Colors.black.withValues(alpha: 0.4),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
-        // Main glow shadow with blue color
+        // Strong glow shadow with cyan/blue color
+        BoxShadow(
+          color: AppColors.info.withValues(alpha: 0.5),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+          spreadRadius: 3,
+        ),
         BoxShadow(
           color: AppColors.info.withValues(alpha: 0.3),
-          blurRadius: 12,
-          offset: const Offset(0, 5),
+          blurRadius: 25,
+          offset: const Offset(0, 8),
           spreadRadius: 2,
         ),
         // Dark shadow for depth
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
+          color: Colors.black.withValues(alpha: 0.3),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
         ),
       ];
     } else {
       return [
-        // Locked state shadows
+        // Subtle locked state shadows
         BoxShadow(
-          color: Colors.grey.withValues(alpha: 0.2),
+          color: Colors.black.withValues(alpha: 0.3),
           blurRadius: 8,
           offset: const Offset(0, 2),
           spreadRadius: 1,
         ),
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.15),
-          blurRadius: 5,
+          color: Colors.black.withValues(alpha: 0.2),
+          blurRadius: 4,
           offset: const Offset(0, 1),
         ),
       ];
@@ -1454,35 +1549,35 @@ class _LevelCardState extends State<_LevelCard> with SingleTickerProviderStateMi
     if (widget.isCompleted) {
       return [
         Shadow(
-          color: Colors.black87,
-          offset: const Offset(1, 1),
-          blurRadius: 4,
+          color: Colors.black.withValues(alpha: 0.9),
+          offset: const Offset(2, 2),
+          blurRadius: 6,
         ),
         Shadow(
-          color: Colors.white24,
+          color: AppColors.completedAccent.withValues(alpha: 0.3),
           offset: const Offset(-1, -1),
-          blurRadius: 2,
+          blurRadius: 4,
         ),
       ];
     } else if (widget.isUnlocked) {
       return [
         Shadow(
-          color: Colors.black87,
-          offset: const Offset(1, 1),
-          blurRadius: 4,
+          color: Colors.black.withValues(alpha: 0.9),
+          offset: const Offset(2, 2),
+          blurRadius: 6,
         ),
         Shadow(
-          color: Colors.white24,
+          color: AppColors.infoLight.withValues(alpha: 0.3),
           offset: const Offset(-1, -1),
-          blurRadius: 2,
+          blurRadius: 4,
         ),
       ];
     } else {
       return [
         Shadow(
-          color: Colors.black87,
-          offset: const Offset(0.5, 0.5),
-          blurRadius: 2,
+          color: Colors.black.withValues(alpha: 0.7),
+          offset: const Offset(1, 1),
+          blurRadius: 3,
         ),
       ];
     }

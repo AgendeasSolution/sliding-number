@@ -39,10 +39,12 @@ class AppTheme {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        AppColors.backgroundDark,
-        AppColors.backgroundMedium,
-        AppColors.backgroundLight,
+        Color(0xFF0A0E27),
+        Color(0xFF1A1F3A),
+        Color(0xFF2A2F4D),
+        Color(0xFF1A1F3A),
       ],
+      stops: [0.0, 0.3, 0.7, 1.0],
     ),
   );
 
