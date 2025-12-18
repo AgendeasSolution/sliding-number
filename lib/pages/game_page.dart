@@ -560,7 +560,7 @@ class _GamePageState extends State<GamePage> {
     if (_isInitializing || _gameState == null) {
       return Scaffold(
         body: Container(
-          decoration: AppTheme.backgroundGradient,
+          decoration: AppTheme.backgroundImage,
           child: const Center(
             child: CircularProgressIndicator(
               color: AppColors.primaryGold,
@@ -579,7 +579,7 @@ class _GamePageState extends State<GamePage> {
       },
       child: Scaffold(
         body: Container(
-          decoration: AppTheme.backgroundGradient,
+          decoration: AppTheme.backgroundImage,
           child: SafeArea(
             child: Column(
               children: [

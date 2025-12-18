@@ -113,11 +113,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     
     return Scaffold(
       body: Container(
-        decoration: AppTheme.backgroundGradient,
+        decoration: AppTheme.backgroundImage,
         child: Stack(
           children: [
-            // Animated background particles
-            _buildAnimatedBackground(),
             // Main content - Logo centered
             Center(
               child: AnimatedBuilder(
@@ -237,15 +235,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   }
 
   Widget _buildAnimatedBackground() {
-    return AnimatedBuilder(
-      animation: _particleAnimation,
-      builder: (context, child) {
-        return CustomPaint(
-          painter: SplashParticlePainter(_particleAnimation.value),
-          size: Size.infinite,
-        );
-      },
-    );
+    // Background animation disabled when using image background
+    return const SizedBox.shrink();
   }
 }
 

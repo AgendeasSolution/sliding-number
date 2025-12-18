@@ -34,6 +34,14 @@ class AppTheme {
     );
   }
 
+  // Background using image instead of gradient
+  static BoxDecoration get backgroundImage => const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img/background.png'),
+          fit: BoxFit.cover,
+        ),
+      );
+
   static BoxDecoration get backgroundGradient => const BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
