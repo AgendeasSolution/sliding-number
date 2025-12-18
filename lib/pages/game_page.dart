@@ -7,6 +7,7 @@ import '../constants/app_constants.dart';
 import '../models/game_state.dart';
 import '../services/game_service.dart';
 import '../services/interstitial_ad_service.dart';
+import '../services/rewarded_ad_service.dart';
 import '../services/audio_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/game_utils.dart';
@@ -31,8 +32,6 @@ class _GamePageState extends State<GamePage> {
   GameState? _gameState;
   Timer? _timer;
   bool _isInitializing = true;
-  bool _leftSwipeUsed = false;
-  bool _rightSwipeUsed = false;
   bool _isLeftSwapMode = false;
   bool _isRightSwapMode = false;
 
@@ -44,6 +43,8 @@ class _GamePageState extends State<GamePage> {
     AudioService.instance.initialize();
     // Preload interstitial ad for better user experience
     InterstitialAdService.instance.preloadAd();
+    // Preload rewarded ad for swipe buttons
+    RewardedAdService.instance.preloadAd();
   }
 
   Future<void> _initializeGame() async {
@@ -72,10 +73,9 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
-        _leftSwipeUsed = false;
-        _rightSwipeUsed = false;
         _isLeftSwapMode = false;
         _isRightSwapMode = false;
+        // Keep unlock state - once unlocked, stays unlocked for the session
         _startGame();
       });
     }
@@ -129,10 +129,9 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.resetToInitial(_gameState!);
-        _leftSwipeUsed = false;
-        _rightSwipeUsed = false;
         _isLeftSwapMode = false;
         _isRightSwapMode = false;
+        // Keep unlock state - once unlocked, stays unlocked for the session
         _startGame();
       });
     }
@@ -188,10 +187,9 @@ class _GamePageState extends State<GamePage> {
       if (mounted) {
         setState(() {
           _gameState = newGameState;
-          _leftSwipeUsed = false;
-          _rightSwipeUsed = false;
           _isLeftSwapMode = false;
           _isRightSwapMode = false;
+          // Keep unlock state - once unlocked, stays unlocked across levels
           _initGame();
         });
       }
@@ -204,10 +202,9 @@ class _GamePageState extends State<GamePage> {
       if (mounted) {
         setState(() {
           _gameState = newGameState;
-          _leftSwipeUsed = false;
-          _rightSwipeUsed = false;
           _isLeftSwapMode = false;
           _isRightSwapMode = false;
+          // Keep unlock state - once unlocked, stays unlocked for the session
           _initGame();
         });
       }
@@ -345,13 +342,6 @@ class _GamePageState extends State<GamePage> {
       _isLeftSwapMode = false;
       _isRightSwapMode = false;
       
-      // Mark the swap as used
-      if (isLeftSwap) {
-        _leftSwipeUsed = true;
-      } else {
-        _rightSwipeUsed = true;
-      }
-      
       if (_gameState!.isWin) {
         _handleWin();
       } else {
@@ -401,10 +391,9 @@ class _GamePageState extends State<GamePage> {
     if (mounted && _gameState != null) {
       setState(() {
         _gameState = GameService.shuffleBoard(_gameState!);
-        _leftSwipeUsed = false;
-        _rightSwipeUsed = false;
         _isLeftSwapMode = false;
         _isRightSwapMode = false;
+        // Keep unlock state - once unlocked, stays unlocked for the session
         _startGame();
       });
       // Show feedback that user earned the shuffle reward
@@ -468,7 +457,7 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  void _onLeftSwipeButtonPressed() {
+  void _onLeftSwipeButtonPressed() async {
     if (_gameState != null && _gameState!.isGameActive) {
       if (_isLeftSwapMode) {
         // Cancel swap mode if already active
@@ -476,18 +465,48 @@ class _GamePageState extends State<GamePage> {
           _isLeftSwapMode = false;
         });
         AudioService.instance.playClickSound();
-      } else if (!_leftSwipeUsed) {
-        // Enter left swap selection mode
-        setState(() {
-          _isLeftSwapMode = true;
-          _isRightSwapMode = false; // Cancel right swap mode if active
-        });
+      } else {
+        // Show rewarded ad every time to use left swipe feature
         AudioService.instance.playClickSound();
+        await _showAdForLeftSwipe();
       }
     }
   }
 
-  void _onRightSwipeButtonPressed() {
+  Future<void> _showAdForLeftSwipe() async {
+    final adShown = await RewardedAdService.instance.showAd(
+      onRewarded: (reward) {
+        // User watched the ad and earned the reward - enable left swipe
+        if (mounted) {
+          setState(() {
+            _isLeftSwapMode = true;
+            _isRightSwapMode = false; // Cancel right swap mode if active
+          });
+          // Preload next ad for future use
+          RewardedAdService.instance.preloadAd();
+        }
+      },
+      onAdFailedToShow: () {
+        // If ad fails to show, enable the feature anyway (graceful fallback)
+        if (mounted) {
+          setState(() {
+            _isLeftSwapMode = true;
+            _isRightSwapMode = false; // Cancel right swap mode if active
+          });
+        }
+      },
+    );
+
+    // If ad wasn't shown (not ready), enable the feature anyway (graceful fallback)
+    if (!adShown && mounted) {
+      setState(() {
+        _isLeftSwapMode = true;
+        _isRightSwapMode = false; // Cancel right swap mode if active
+      });
+    }
+  }
+
+  void _onRightSwipeButtonPressed() async {
     if (_gameState != null && _gameState!.isGameActive) {
       if (_isRightSwapMode) {
         // Cancel swap mode if already active
@@ -495,14 +514,44 @@ class _GamePageState extends State<GamePage> {
           _isRightSwapMode = false;
         });
         AudioService.instance.playClickSound();
-      } else if (!_rightSwipeUsed) {
-        // Enter right swap selection mode
-        setState(() {
-          _isRightSwapMode = true;
-          _isLeftSwapMode = false; // Cancel left swap mode if active
-        });
+      } else {
+        // Show rewarded ad every time to use right swipe feature
         AudioService.instance.playClickSound();
+        await _showAdForRightSwipe();
       }
+    }
+  }
+
+  Future<void> _showAdForRightSwipe() async {
+    final adShown = await RewardedAdService.instance.showAd(
+      onRewarded: (reward) {
+        // User watched the ad and earned the reward - enable right swipe
+        if (mounted) {
+          setState(() {
+            _isRightSwapMode = true;
+            _isLeftSwapMode = false; // Cancel left swap mode if active
+          });
+          // Preload next ad for future use
+          RewardedAdService.instance.preloadAd();
+        }
+      },
+      onAdFailedToShow: () {
+        // If ad fails to show, enable the feature anyway (graceful fallback)
+        if (mounted) {
+          setState(() {
+            _isRightSwapMode = true;
+            _isLeftSwapMode = false; // Cancel left swap mode if active
+          });
+        }
+      },
+    );
+
+    // If ad wasn't shown (not ready), enable the feature anyway (graceful fallback)
+    if (!adShown && mounted) {
+      setState(() {
+        _isRightSwapMode = true;
+        _isLeftSwapMode = false; // Cancel left swap mode if active
+      });
     }
   }
 
@@ -706,7 +755,6 @@ class _GamePageState extends State<GamePage> {
             icon: Icons.arrow_back,
             label: _isLeftSwapMode ? 'Cancel' : 'Swipe Left',
             onPressed: _onLeftSwipeButtonPressed,
-            isUsed: _leftSwipeUsed,
             isEnabled: _gameState?.isGameActive ?? false,
             isActive: _isLeftSwapMode,
           ),
@@ -715,7 +763,6 @@ class _GamePageState extends State<GamePage> {
             icon: Icons.arrow_forward,
             label: _isRightSwapMode ? 'Cancel' : 'Swipe Right',
             onPressed: _onRightSwipeButtonPressed,
-            isUsed: _rightSwipeUsed,
             isEnabled: _gameState?.isGameActive ?? false,
             isActive: _isRightSwapMode,
           ),
@@ -728,11 +775,10 @@ class _GamePageState extends State<GamePage> {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
-    required bool isUsed,
     required bool isEnabled,
     bool isActive = false,
   }) {
-    final bool isDisabled = (isUsed && !isActive) || !isEnabled;
+    final bool isDisabled = !isEnabled;
     
     return Expanded(
       child: Opacity(
@@ -771,27 +817,44 @@ class _GamePageState extends State<GamePage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  color: AppColors.textWhite,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    isUsed ? 'Used' : label,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
                       color: AppColors.textWhite,
-                      fontSize: 14,
+                      size: 20,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textWhite,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
+                if (!isActive && isEnabled)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Watch Ad',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textWhite.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
