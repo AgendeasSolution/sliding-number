@@ -30,11 +30,27 @@ class GameBoard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate board dimensions based on aspect ratio
+        // Constants for spacing
+        const outerBorderWidth = 3.0;
+        const innerMargin = 3.0;
+        const innerPadding = 6.0;
+        const totalHorizontalPadding = outerBorderWidth + innerMargin + innerPadding;
+        const totalVerticalPadding = outerBorderWidth + innerMargin + innerPadding;
+        
+        // Calculate available width for the grid content
         final availableWidth = constraints.maxWidth;
-        final aspectRatio = gameState.rows / gameState.columns;
+        final gridContentWidth = availableWidth - (totalHorizontalPadding * 2);
+        
+        // Calculate tile size based on columns and spacing
+        final tileSpacing = AppConstants.tileSpacing;
+        final tileWidth = (gridContentWidth - (tileSpacing * (gameState.columns - 1))) / gameState.columns;
+        
+        // Calculate grid content height based on rows and tile size
+        final gridContentHeight = (tileWidth * gameState.rows) + (tileSpacing * (gameState.rows - 1));
+        
+        // Calculate total board height including all padding/margins/borders
         final boardWidth = availableWidth;
-        final boardHeight = boardWidth * aspectRatio;
+        final boardHeight = gridContentHeight + (totalVerticalPadding * 2);
 
         return Center(
           child: SizedBox(
@@ -44,17 +60,19 @@ class GameBoard extends StatelessWidget {
               onVerticalDragEnd: onVerticalDragEnd,
               onHorizontalDragEnd: onHorizontalDragEnd,
               child: Container(
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   // Outer wooden frame for the board (no shadow)
                   color: AppColors.woodButtonFill,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: AppColors.woodButtonBorderDark,
-                    width: 3,
+                    width: outerBorderWidth,
                   ),
                 ),
                 child: Container(
-                  margin: const EdgeInsets.all(3),
+                  margin: const EdgeInsets.all(innerMargin),
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     // Inner inset frame to mimic wooden tray
                     color: AppColors.woodBackground.withValues(alpha: 0.96),
@@ -64,13 +82,15 @@ class GameBoard extends StatelessWidget {
                       width: 1.5,
                     ),
                   ),
-                  padding: const EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(innerPadding),
                   child: GridView.builder(
+                    shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: gameState.columns,
-                      mainAxisSpacing: AppConstants.tileSpacing,
-                      crossAxisSpacing: AppConstants.tileSpacing,
+                      mainAxisSpacing: tileSpacing,
+                      crossAxisSpacing: tileSpacing,
+                      childAspectRatio: 1.0,
                     ),
                     itemCount: gameState.rows * gameState.columns,
                     itemBuilder: (context, index) {

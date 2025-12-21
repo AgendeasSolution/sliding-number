@@ -31,6 +31,7 @@ class GameTile extends StatelessWidget {
         duration: AppConstants.tileAnimationDuration,
         opacity: isVisible ? 1.0 : 0.0,
         child: Container(
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             // Wooden-style tiles to match home screen & reference game
             gradient: isVisible
@@ -76,12 +77,16 @@ class GameTile extends StatelessWidget {
                 : [],
           ),
           child: Center(
-            child: Text(
-              isVisible ? '$tileValue' : '',
-              style: TextStyle(
-                fontSize: GameUtils.getTileFontSize(rows, columns),
-                fontWeight: FontWeight.w900,
-                color: AppColors.woodButtonText,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                isVisible ? '$tileValue' : '',
+                style: TextStyle(
+                  fontSize: GameUtils.getTileFontSize(rows, columns),
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.woodButtonText,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
